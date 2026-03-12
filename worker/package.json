@@ -10,6 +10,7 @@
     "db:create": "wrangler d1 create guitar-club-db",
     "db:init": "wrangler d1 execute guitar-club-db --file=schema.sql",
     "db:init:local": "wrangler d1 execute guitar-club-db --local --file=schema.sql",
+    "db:migrate:legacy": "wrangler d1 execute guitar-club-db --remote --file=migrations/2026-03-12-legacy-d1-to-canonical.sql",
     "db:migrate:songs": "wrangler d1 execute guitar-club-db --file=migrations/2026-03-11-songs-consistency.sql",
     "db:migrate:songs:local": "wrangler d1 execute guitar-club-db --local --file=migrations/2026-03-11-songs-consistency.sql"
   },

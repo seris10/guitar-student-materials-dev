@@ -43,6 +43,11 @@ If you already have an existing database, run the songs consistency migration on
 npm run db:migrate:songs
 ```
 
+If your remote DB is from the old legacy schema (`practice_log`, `user_progress`, `songs` with `wishlist/learning/mastered`), run:
+```bash
+npm run db:migrate:legacy
+```
+
 ### 4. Run locally
 
 ```bash
