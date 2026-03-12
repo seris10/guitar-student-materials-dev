@@ -119,8 +119,17 @@ After running `db:init`, these accounts exist:
 
 ## Notes
 
-- Currently uses demo PIN hashing (`$demo$123456`)
-- Production should use argon2 via `@node-rs/argon2`
 - Session stored in httpOnly cookie (7 day expiry)
 - Every API response includes an `X-Request-Id` header for traceability
 - Worker logs emit structured JSON per request and unhandled error
+- Optional error alert webhook: set `ERROR_WEBHOOK_URL` as a Worker secret
+
+## Monitoring hook (optional)
+
+Forward unhandled worker errors to your alerting endpoint:
+
+```bash
+wrangler secret put ERROR_WEBHOOK_URL
+```
+
+The worker posts JSON payloads including `requestId`, `path`, `method`, `durationMs`, and `message`.

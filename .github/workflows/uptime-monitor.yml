@@ -1,0 +1,24 @@
+name: Uptime Monitor
+
+on:
+  schedule:
+    - cron: "*/30 * * * *"
+  workflow_dispatch:
+
+jobs:
+  uptime:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+
+      - name: Check public site and API health endpoint
+        env:
+          SITE_URL: ${{ vars.UPTIME_SITE_URL }}
+          API_BASE_URL: ${{ vars.UPTIME_API_BASE_URL }}
+        run: node monitoring/uptime-check.mjs

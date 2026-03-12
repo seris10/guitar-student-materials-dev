@@ -8,6 +8,7 @@
 export interface Env {
   DB: D1Database;
   ENVIRONMENT: string;
+  ERROR_WEBHOOK_URL?: string;
 }
 
 // Allowed origins for CORS
@@ -153,6 +154,41 @@ function generateRequestId(): string {
     return crypto.randomUUID();
   }
   return generateSessionId();
+}
+
+interface ErrorAlertPayload {
+  requestId: string;
+  method: string;
+  path: string;
+  durationMs: number;
+  ip: string;
+  message: string;
+  environment: string;
+  timestamp: string;
+}
+
+async function sendErrorAlert(env: Env, payload: ErrorAlertPayload): Promise<void> {
+  const webhookUrl = env.ERROR_WEBHOOK_URL?.trim();
+  if (!webhookUrl) return;
+
+  try {
+    await fetch(webhookUrl, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        text: `Guitar Club API error (${payload.environment})`,
+        ...payload,
+      }),
+    });
+  } catch (webhookError) {
+    const webhookMessage = webhookError instanceof Error ? webhookError.message : String(webhookError);
+    console.error(JSON.stringify({
+      level: 'error',
+      event: 'error_webhook_failed',
+      requestId: payload.requestId,
+      message: webhookMessage,
+    }));
+  }
 }
 
 // Rate limiter (in-memory, resets on cold start — fine for class scale)
@@ -1090,16 +1126,27 @@ export default {
       return response;
     } catch (err) {
       const message = err instanceof Error ? err.message : String(err);
+      const durationMs = Date.now() - startedAt;
       console.error(JSON.stringify({
         level: 'error',
         event: 'unhandled',
         requestId,
         method,
         path,
-        durationMs: Date.now() - startedAt,
+        durationMs,
         ip,
         message,
       }));
+      await sendErrorAlert(env, {
+        requestId,
+        method,
+        path,
+        durationMs,
+        ip,
+        message,
+        environment: env.ENVIRONMENT,
+        timestamp: new Date().toISOString(),
+      });
       const response = error('Internal server error', 500);
       response.headers.set('X-Request-Id', requestId);
       return response;

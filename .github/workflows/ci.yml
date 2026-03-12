@@ -34,3 +34,10 @@ jobs:
         run: |
           node --check scripts/api.js
           node --check scripts/auth.js
+          node --check scripts/main.js
+          node --check scripts/sidebar.js
+          node --check scripts/skill-data.js
+          node --check scripts/song.js
+
+      - name: Frontend smoke tests
+        run: node tests/smoke/site-smoke.mjs

@@ -17,7 +17,13 @@ database_id = "6511e4d0-62fe-468f-914a-0c9f1809f1a0"
 # Environment variables
 [vars]
 ENVIRONMENT = "development"
+# Optional: set ERROR_WEBHOOK_URL via `wrangler secret put ERROR_WEBHOOK_URL`
 
 # Production overrides
 [env.production]
 vars = { ENVIRONMENT = "production" }
+
+[[env.production.d1_databases]]
+binding = "DB"
+database_name = "guitar-club-db"
+database_id = "6511e4d0-62fe-468f-914a-0c9f1809f1a0"
