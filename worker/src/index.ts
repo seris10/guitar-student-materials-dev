@@ -14,6 +14,7 @@ export interface Env {
 const ALLOWED_ORIGINS = [
   'https://guitar-students.pages.dev',
   'https://guitar-club-dev.pages.dev',
+  'https://guitar-students-live.pages.dev',
   'http://localhost:3000',
   'http://localhost:8788',
   'http://127.0.0.1:8788',
@@ -25,7 +26,8 @@ function getCorsHeaders(request: Request) {
   // Allow any *.guitar-students.pages.dev preview deploy
   const isAllowed = ALLOWED_ORIGINS.includes(origin)
     || origin.endsWith('.guitar-students.pages.dev')
-    || origin.endsWith('.guitar-club-dev.pages.dev');
+    || origin.endsWith('.guitar-club-dev.pages.dev')
+    || origin.endsWith('.guitar-students-live.pages.dev');
 
   return {
     'Access-Control-Allow-Origin': isAllowed ? origin : ALLOWED_ORIGINS[0],

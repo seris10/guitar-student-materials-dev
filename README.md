@@ -1,8 +1,8 @@
 # Guitar Student Materials Dev
 
 Live site:
-- https://guitar-club-dev.pages.dev
-- https://d185f510.guitar-club-dev.pages.dev
+- https://guitar-students-live.pages.dev
+- https://7540121e.guitar-students-live.pages.dev
 
 Live API:
 - https://guitar-club-api.rootsofreason.workers.dev/api/health
@@ -23,7 +23,7 @@ npm run dev
 
 Frontend (Cloudflare Pages):
 ```bash
-npx wrangler pages deploy . --project-name guitar-club-dev --branch main --commit-dirty=true
+npx wrangler pages deploy . --project-name guitar-students-live --branch main --commit-dirty=true
 ```
 
 Worker:
