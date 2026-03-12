@@ -1,0 +1,190 @@
+/* ============================================
+   BASE: Variables, resets, scrollbar, typography
+   Guitar Club - Student Materials
+   ============================================ */
+
+:root {
+  /* Layout dimensions */
+  --sidebar-width: 240px;
+  --content-max: 900px;
+  --tab-max: 720px;
+  --video-max-height: 400px;
+  
+  /* Spacing scale (8pt grid) */
+  --space-xs: 4px;
+  --space-sm: 8px;
+  --space-md: 16px;
+  --space-lg: 24px;
+  --space-xl: 32px;
+  --space-2xl: 48px;
+  
+  /* Theme colors */
+  --bg-primary: #0d1117;
+  --bg-secondary: #161b22;
+  --bg-tertiary: #21262d;
+  --text-primary: #e6edf3;
+  --text-secondary: #7d8590;
+  --text-muted: #484f58;
+  --accent: #58a6ff;
+  --accent-green: #3fb950;
+  --accent-orange: #ffa657;
+  --border: #30363d;
+  
+  /* Typography */
+  --font-sans: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  --font-mono: 'SF Mono', 'Fira Code', 'Consolas', 'Courier New', monospace;
+}
+
+/* Reset */
+*, *::before, *::after {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+html {
+  scroll-behavior: smooth;
+}
+
+body {
+  font-family: var(--font-sans);
+  background: var(--bg-primary);
+  color: var(--text-primary);
+  min-height: 100vh;
+  line-height: 1.5;
+}
+
+/* ============================================
+   STARRY SPACE BACKGROUND
+   ============================================ */
+body::before,
+body::after {
+  content: '';
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+  z-index: -1;
+}
+
+/* Star layer 1 - small distant stars */
+body::before {
+  background-image: 
+    radial-gradient(1px 1px at 20px 30px, white, transparent),
+    radial-gradient(1px 1px at 40px 70px, rgba(255,255,255,0.8), transparent),
+    radial-gradient(1px 1px at 50px 160px, rgba(255,255,255,0.6), transparent),
+    radial-gradient(1px 1px at 90px 40px, white, transparent),
+    radial-gradient(1px 1px at 130px 80px, rgba(255,255,255,0.7), transparent),
+    radial-gradient(1px 1px at 160px 120px, white, transparent),
+    radial-gradient(1px 1px at 200px 50px, rgba(255,255,255,0.5), transparent),
+    radial-gradient(1px 1px at 220px 150px, white, transparent),
+    radial-gradient(1px 1px at 250px 90px, rgba(255,255,255,0.8), transparent),
+    radial-gradient(1px 1px at 280px 30px, white, transparent),
+    radial-gradient(1px 1px at 310px 180px, rgba(255,255,255,0.6), transparent),
+    radial-gradient(1px 1px at 350px 60px, white, transparent),
+    radial-gradient(1px 1px at 380px 140px, rgba(255,255,255,0.9), transparent),
+    radial-gradient(1px 1px at 420px 100px, white, transparent),
+    radial-gradient(1px 1px at 450px 20px, rgba(255,255,255,0.7), transparent),
+    radial-gradient(1px 1px at 480px 170px, white, transparent),
+    radial-gradient(1px 1px at 510px 45px, rgba(255,255,255,0.5), transparent),
+    radial-gradient(1px 1px at 540px 130px, white, transparent),
+    radial-gradient(1px 1px at 580px 75px, rgba(255,255,255,0.8), transparent),
+    radial-gradient(1px 1px at 620px 165px, white, transparent);
+  background-repeat: repeat;
+  background-size: 650px 200px;
+  animation: twinkle 4s ease-in-out infinite alternate;
+}
+
+/* Star layer 2 - brighter closer stars */
+body::after {
+  background-image: 
+    radial-gradient(2px 2px at 100px 50px, rgba(255,255,255,0.9), transparent),
+    radial-gradient(2px 2px at 300px 120px, rgba(200,220,255,0.8), transparent),
+    radial-gradient(1.5px 1.5px at 180px 180px, rgba(255,255,200,0.9), transparent),
+    radial-gradient(2px 2px at 500px 80px, rgba(255,255,255,0.7), transparent),
+    radial-gradient(1.5px 1.5px at 650px 160px, rgba(200,200,255,0.8), transparent),
+    radial-gradient(2px 2px at 400px 200px, white, transparent),
+    radial-gradient(1.5px 1.5px at 50px 140px, rgba(255,220,200,0.9), transparent),
+    radial-gradient(2px 2px at 750px 40px, rgba(255,255,255,0.8), transparent);
+  background-repeat: repeat;
+  background-size: 800px 250px;
+  animation: twinkle 6s ease-in-out infinite alternate-reverse;
+}
+
+@keyframes twinkle {
+  0% { opacity: 0.5; }
+  50% { opacity: 0.8; }
+  100% { opacity: 1; }
+}
+
+/* Offset for sticky elements when using anchor links */
+[id] {
+  scroll-margin-top: 60px;
+}
+
+/* Links */
+a {
+  color: var(--accent);
+  text-decoration: none;
+}
+
+a:hover {
+  text-decoration: underline;
+}
+
+/* ============================================
+   SCROLLBAR: Themed for dark mode
+   ============================================ */
+
+/* Webkit browsers (Chrome, Safari, Edge) */
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+::-webkit-scrollbar-thumb {
+  background: var(--border);
+  border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: var(--text-secondary);
+}
+
+::-webkit-scrollbar-corner {
+  background: transparent;
+}
+
+/* Standard properties (Firefox, Chrome 121+) */
+@supports not selector(::-webkit-scrollbar) {
+  * {
+    scrollbar-width: thin;
+    scrollbar-color: var(--border) transparent;
+  }
+}
+
+/* ============================================
+   ALIASES: song.css compatibility layer
+   Maps song page variable names → hub tokens
+   Remove after song.css is fully migrated
+   ============================================ */
+:root {
+  --bg-body: var(--bg-primary);
+  --bg-surface: var(--bg-secondary);
+  --bg-surface-hover: var(--bg-tertiary);
+  --bg-accent-subtle: rgba(88, 166, 255, 0.1);
+  --border-color: var(--border);
+  --border-highlight: var(--text-muted);
+  --accent-color: var(--accent);
+  --accent-hover: var(--accent);
+  --container-width: var(--content-max);
+  --radius-sm: 6px;
+  --radius-md: 12px;
+  --radius-lg: 16px;
+}

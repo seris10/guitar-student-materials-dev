@@ -1,0 +1,146 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Hey Lover - Guitar Club</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="../../styles/base.css">
+  <link rel="stylesheet" href="../../styles/components.css">
+  <link rel="stylesheet" href="../../styles/song.css">
+  <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/raphael/2.3.0/raphael.min.js"></script>
+  <script src="https://jtab.tardate.com/javascripts/jtab.js"></script>
+</head>
+<body>
+
+<div class="container">
+  
+  <div class="back-nav">
+    <a href="../../" class="back-link">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="19" y1="12" x2="5" y2="12"></line><polyline points="12 19 5 12 12 5"></polyline></svg>
+      Back to Songbook
+    </a>
+  </div>
+
+  <header>
+    <h1>Hey Lover</h1>
+    <div class="artist">The Daughters of Eve</div>
+    
+    <div class="capo-badge">⚠️ Capo 1st Fret</div>
+
+    <div class="meta-grid">
+      <div class="meta-item">
+        <span class="meta-label">Key</span>
+        <span class="meta-value">Eb (D shapes)</span>
+      </div>
+      <div class="meta-item">
+        <span class="meta-label">Tempo</span>
+        <span class="meta-value">140 BPM</span>
+      </div>
+      <div class="meta-item">
+        <span class="meta-label">Difficulty</span>
+        <span class="meta-value">Beginner</span>
+      </div>
+      <div class="meta-item">
+        <span class="meta-label">Tuning</span>
+        <span class="meta-value">Standard</span>
+      </div>
+      <div class="meta-item">
+        <span class="meta-label">UG Tab</span>
+        <span class="meta-value"><a href="https://tabs.ultimate-guitar.com/tab/print?app_utm_campaign=Export2pdfDownload&flats=0&font_size=0&id=3074063&is_ukulele=0&simplified=0&transpose=0" target="_blank">View on Ultimate Guitar ↗</a></span>
+      </div>
+    </div>
+  </header>
+
+  <section id="listen">
+    <h2>Listen to Track</h2>
+    <div class="video-wrapper" data-video-id="KbHaIbDKQMc">
+      <img class="video-thumbnail" src="https://img.youtube.com/vi/KbHaIbDKQMc/maxresdefault.jpg" alt="The Daughters of Eve - Hey Lover">
+      <div class="video-play-btn"><svg viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg></div>
+      <button class="video-popout-btn">Pop out ↗</button>
+    </div>
+  </section>
+
+  <div class="sticky-nav-container">
+    <nav class="section-nav">
+      <a href="#intro">Intro Lick</a>
+      <a href="#strum">Strumming</a>
+      <a href="#chords">Chords</a>
+      <a href="#structure">Structure</a>
+    </nav>
+  </div>
+
+  <section id="intro">
+    <h2>Intro Lick</h2>
+    <p class="note">This distinct riff repeats throughout the intro and verses.</p>
+    
+    <div class="tab-container">
+      <div class="tab-header">
+        <span class="tab-title">MAIN_RIFF.TAB</span>
+        <button class="copy-btn">Copy Tab</button>
+      </div>
+      <div class="tab-content">
+        <pre class="tab">e|--------5--7-5----------|-----------------|--------5--7-5----------|--------------------5--|
+B|-----7----------7--5----|--5--------------|-----7----------7--5----|-5--7--5-----5--7-----|
+G|--------------------7---|-----------------|--------------------7---|----------7-----------|
+D|------------------------|-----------------|------------------------|----------------------|
+A|------------------------|-----------------|------------------------|----------------------|
+E|------------------------|-----------------|------------------------|----------------------|
+
+------5--|
+-7-------|
+---------|
+---------|
+---------|
+---------|</pre>
+      </div>
+    </div>
+  </section>
+
+  <section id="strum">
+    <h2>Strumming Pattern</h2>
+    <p class="note">Fast paced at 140bpm. Keep your wrist loose.</p>
+    
+    <div class="strum-container">
+      <div class="beat-group"><div class="strum-arrow">↓</div><div class="beat-count main">1</div></div>
+      <div class="beat-group"><div class="strum-arrow miss">·</div><div class="beat-count">&</div></div>
+      <div class="beat-group"><div class="strum-arrow">↓</div><div class="beat-count main">2</div></div>
+      <div class="beat-group"><div class="strum-arrow">↑</div><div class="beat-count">&</div></div>
+      <div class="beat-group"><div class="strum-arrow miss">·</div><div class="beat-count main">3</div></div>
+      <div class="beat-group"><div class="strum-arrow">↑</div><div class="beat-count">&</div></div>
+      <div class="beat-group"><div class="strum-arrow">↓</div><div class="beat-count main">4</div></div>
+      <div class="beat-group"><div class="strum-arrow">↑</div><div class="beat-count">&</div></div>
+    </div>
+  </section>
+
+  <section id="chords">
+    <h2>Chords</h2>
+    <p class="note">Played with Capo on 1st fret (shapes shown below).</p>
+    <div class="chord-grid">
+      <div class="chord-card"><h3>G</h3><div class="jtab chordonly">G</div></div>
+      <div class="chord-card"><h3>D</h3><div class="jtab chordonly">D</div></div>
+      <div class="chord-card"><h3>Bm</h3><div class="jtab chordonly">Bm</div></div>
+      <div class="chord-card"><h3>A</h3><div class="jtab chordonly">A</div></div>
+    </div>
+  </section>
+
+  <section id="structure">
+    <h2>Song Structure</h2>
+    <div class="structure-list">
+      <div class="structure-item"><div class="part-name">Intro</div><div class="part-detail">Main Lick × 2</div></div>
+      <div class="structure-item"><div class="part-name">Verse</div><div class="part-detail">G — D — G — D</div></div>
+      <div class="structure-item"><div class="part-name">Chorus</div><div class="part-detail">Bm — A — G — D</div></div>
+      <div class="structure-item"><div class="part-name">Outro</div><div class="part-detail">Main Lick (fade out)</div></div>
+    </div>
+  </section>
+
+  <footer><p>Guitar Club Student Materials</p></footer>
+
+</div>
+
+<script src="../../scripts/song.js"></script>
+</body>
+</html>

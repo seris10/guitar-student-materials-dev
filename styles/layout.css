@@ -1,0 +1,123 @@
+/* ============================================
+   LAYOUT: Grid, sidebar, responsive breakpoints
+   Guitar Club - Student Materials
+   ============================================ */
+
+/* Page wrapper - no max-width, let content determine width */
+.page {
+  padding: var(--space-xl);
+}
+
+/* Hub page uses wider layout for card grid */
+.page.hub {
+  display: flex;
+  gap: 32px;
+  max-width: none;
+}
+
+.page.hub .main-content {
+  flex: 1;
+  max-width: 1000px;
+}
+
+/* Header */
+header {
+  margin-bottom: var(--space-2xl, 48px);
+  padding-top: var(--space-lg);
+}
+
+.page.hub header h1 {
+  font-size: 36px;
+  font-weight: 700;
+  letter-spacing: -0.02em;
+  background: linear-gradient(to right, #fff, #a5b4fc);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  margin-bottom: var(--space-xs);
+}
+
+header h1 {
+  font-size: 28px;
+  font-weight: 600;
+  margin-bottom: var(--space-xs);
+}
+
+header p,
+header .artist {
+  color: var(--text-secondary);
+  font-size: 16px;
+}
+
+.tagline {
+  font-size: 15px;
+  color: var(--text-muted);
+  font-weight: 400;
+}
+
+/* Back link */
+.back-link {
+  color: var(--text-secondary);
+  text-decoration: none;
+  font-size: 14px;
+  display: inline-block;
+  margin-bottom: var(--space-md);
+}
+
+.back-link:hover {
+  color: var(--accent);
+  text-decoration: none;
+}
+
+/* Section headings */
+section {
+  margin-bottom: var(--space-xl);
+}
+
+h2 {
+  font-size: 16px;
+  font-weight: 600;
+  color: var(--accent);
+  margin-bottom: var(--space-md);
+}
+
+/* Meta info row */
+.meta {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-md);
+  margin: var(--space-md) 0 var(--space-lg);
+  font-size: 14px;
+  color: var(--text-secondary);
+}
+
+.meta strong {
+  color: var(--text-primary);
+}
+
+/* ============================================
+   RESPONSIVE BREAKPOINTS
+   ============================================ */
+
+/* Tablet */
+@media (max-width: 1099px) {
+  .page {
+    padding: var(--space-lg);
+  }
+}
+
+/* Mobile */
+@media (max-width: 799px) {
+  .page {
+    padding: var(--space-md);
+  }
+  
+  header h1 {
+    font-size: 22px;
+  }
+  
+  .meta {
+    flex-direction: column;
+    gap: var(--space-sm);
+  }
+}

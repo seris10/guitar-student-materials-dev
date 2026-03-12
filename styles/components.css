@@ -1,0 +1,1042 @@
+/* ============================================
+   COMPONENTS: Tab container, video, nav, cards
+   Guitar Club - Student Materials
+   ============================================ */
+
+/* ============================================
+   TAB CONTAINER: Gemini-style with header + copy
+   ============================================ */
+
+.tab-container {
+  background: var(--bg-secondary);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md, 12px);
+  overflow: hidden;
+  margin-top: var(--space-md);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+}
+
+.tab-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 12px 20px;
+  background: rgba(255, 255, 255, 0.03);
+  border-bottom: 1px solid var(--border);
+}
+
+.tab-title {
+  font-family: var(--font-mono);
+  font-size: 13px;
+  color: var(--text-secondary);
+  font-weight: 600;
+}
+
+.copy-btn {
+  background: transparent;
+  border: 1px solid var(--border);
+  color: var(--text-secondary);
+  padding: 6px 12px;
+  border-radius: 6px;
+  font-size: 12px;
+  font-family: var(--font-sans);
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.copy-btn:hover {
+  background: var(--bg-tertiary);
+  color: var(--text-primary);
+  border-color: var(--text-muted);
+}
+
+.copy-btn.copied {
+  background: rgba(63, 185, 80, 0.15);
+  border-color: transparent;
+  color: var(--accent-green);
+}
+
+.tab-content {
+  overflow-x: auto;
+  padding: 24px;
+}
+
+/* Tab content (pre element) */
+pre.tab {
+  font-family: var(--font-mono);
+  font-size: 14px;
+  line-height: 1.5;
+  color: var(--text-primary);
+  margin: 0;
+  white-space: pre;
+  tab-size: 4;
+  -moz-tab-size: 4;
+}
+
+/* Note text above tabs */
+p.note {
+  color: var(--text-secondary);
+  margin-bottom: var(--space-md);
+  font-size: 15px;
+}
+
+
+/* ============================================
+   VIDEO: Centered, lazy-loadable, with pop-out
+   ============================================ */
+
+.video-container {
+  max-width: 640px;
+  max-height: var(--video-max-height);
+  margin: 0 auto var(--space-xl) auto;
+  position: relative;
+  background: #000;
+  border-radius: 8px;
+  overflow: hidden;
+  aspect-ratio: 16 / 9;
+}
+
+.video-container iframe {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  border: none;
+}
+
+/* Thumbnail placeholder */
+.video-thumbnail {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  cursor: pointer;
+  transition: opacity 0.2s;
+}
+
+.video-thumbnail:hover {
+  opacity: 0.9;
+}
+
+/* Play button overlay */
+.video-play-btn {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  width: 68px;
+  height: 48px;
+  background: rgba(0, 0, 0, 0.8);
+  border-radius: 12px;
+  pointer-events: none;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.video-play-btn::after {
+  content: '';
+  border-style: solid;
+  border-width: 10px 0 10px 18px;
+  border-color: transparent transparent transparent white;
+}
+
+.video-container:hover .video-play-btn {
+  background: #ff0000;
+}
+
+/* Pop-out button */
+.video-popout-btn {
+  position: absolute;
+  top: var(--space-sm);
+  right: var(--space-sm);
+  background: rgba(0, 0, 0, 0.7);
+  border: none;
+  color: white;
+  padding: var(--space-xs) var(--space-sm);
+  border-radius: 4px;
+  font-size: 12px;
+  cursor: pointer;
+  opacity: 0;
+  transition: opacity 0.2s;
+  z-index: 5;
+}
+
+.video-container:hover .video-popout-btn {
+  opacity: 1;
+}
+
+.video-popout-btn:hover {
+  background: rgba(0, 0, 0, 0.9);
+}
+
+/* ============================================
+   SECTION NAV: Gemini-style floating pill nav
+   ============================================ */
+
+.sticky-nav-container {
+  position: sticky;
+  top: 20px;
+  z-index: 100;
+  margin-bottom: 40px;
+  display: flex;
+  justify-content: center;
+}
+
+.section-nav {
+  background: rgba(22, 27, 34, 0.8);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  padding: 6px;
+  border-radius: 100px;
+  border: 1px solid var(--border);
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.4);
+  display: flex;
+  gap: 4px;
+  flex-wrap: wrap;
+  justify-content: center;
+}
+
+.section-nav a {
+  padding: 8px 20px;
+  border-radius: 100px;
+  font-size: 14px;
+  font-weight: 500;
+  color: var(--text-secondary);
+  transition: all 0.2s ease;
+}
+
+.section-nav a:hover {
+  color: var(--text-primary);
+  background: var(--bg-tertiary);
+  text-decoration: none;
+}
+
+.section-nav a.active {
+  background: var(--accent);
+  color: #fff;
+  box-shadow: 0 2px 10px rgba(88, 166, 255, 0.3);
+}
+
+
+/* ============================================
+   HUB PAGE: Song grid, chords, tips
+   ============================================ */
+
+/* Song Grid */
+.song-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+  gap: 16px;
+}
+
+.song-card {
+  display: grid;
+  grid-template-columns: 140px 1fr;
+  gap: 16px;
+  padding: 14px;
+  background: var(--bg-secondary);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  transition: border-color 0.2s, transform 0.2s;
+}
+
+.song-card:hover {
+  border-color: var(--accent);
+  transform: translateY(-2px);
+}
+
+/* Video Preview Thumbnail */
+.video-preview {
+  aspect-ratio: 16/9;
+  border-radius: 8px;
+  overflow: hidden;
+  background: #000;
+  position: relative;
+  cursor: pointer;
+}
+
+.preview-thumb {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  transition: opacity 0.2s;
+}
+
+.video-preview:hover .preview-thumb {
+  opacity: 0.7;
+}
+
+.preview-play {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  width: 40px;
+  height: 40px;
+  background: rgba(0, 0, 0, 0.7);
+  border: none;
+  border-radius: 50%;
+  color: white;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: background 0.2s, transform 0.2s;
+}
+
+.preview-play svg {
+  width: 16px;
+  height: 16px;
+  margin-left: 2px;
+}
+
+.video-preview:hover .preview-play {
+  background: var(--accent);
+  transform: translate(-50%, -50%) scale(1.1);
+}
+
+/* Song Info */
+.song-info {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.song-info .song-title {
+  font-size: 16px;
+  font-weight: 600;
+  color: var(--text-primary);
+  margin: 0;
+}
+
+.song-info .song-artist {
+  font-size: 14px;
+  color: var(--text-secondary);
+  margin-bottom: 8px;
+}
+
+/* Chips */
+.song-chips {
+  display: flex;
+  gap: 6px;
+  flex-wrap: wrap;
+  margin-bottom: auto;
+}
+
+.chip {
+  font-size: 11px;
+  padding: 3px 8px;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.04);
+  border: 1px solid var(--border);
+  color: var(--text-secondary);
+}
+
+/* Song Actions */
+.song-actions {
+  margin-top: 10px;
+}
+
+.btn-open {
+  display: inline-block;
+  padding: 6px 14px;
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--text-primary);
+  background: var(--bg-tertiary);
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  text-decoration: none;
+  transition: all 0.2s;
+}
+
+.btn-open:hover {
+  background: var(--accent);
+  border-color: var(--accent);
+  color: #fff;
+  text-decoration: none;
+}
+
+/* Panel wrapper for sections */
+.panel {
+  background: var(--bg-secondary);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  padding: 20px;
+}
+
+/* Chord row */
+.chord-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-md);
+}
+
+.chord-item {
+  background: var(--bg-secondary);
+  padding: 12px 16px;
+  border-radius: 6px;
+  text-align: center;
+  border: 1px solid var(--border);
+  min-width: 80px;
+}
+
+.chord-name {
+  font-weight: 600;
+  color: var(--accent-orange);
+  margin-bottom: 4px;
+}
+
+/* jTab chord diagrams */
+.jtab {
+  min-height: 118px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.jtab svg {
+  display: block;
+}
+
+/* jTab overrides */
+.jtab svg text {
+  fill: var(--text-primary) !important;
+}
+
+.jtab svg path,
+.jtab svg line,
+.jtab svg rect {
+  stroke: var(--text-secondary) !important;
+}
+
+.jtab svg circle {
+  fill: var(--accent) !important;
+  stroke: var(--accent) !important;
+}
+
+/* Tips Grid */
+.tips-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  gap: 12px;
+}
+
+.tip-card {
+  padding: 14px 16px;
+  background: var(--bg-secondary);
+  border-radius: 10px;
+  border-left: 3px solid var(--accent-green);
+  font-size: 14px;
+  line-height: 1.5;
+}
+
+.tip-card strong {
+  color: var(--accent-green);
+}
+
+/* Legacy tips list (kept for compatibility) */
+.tips-list {
+  list-style: none;
+}
+
+.tips-list li {
+  padding: 10px 12px;
+  background: var(--bg-secondary);
+  border-radius: 6px;
+  margin-bottom: 6px;
+  border-left: 3px solid var(--accent-green);
+  font-size: 14px;
+  line-height: 1.5;
+}
+
+.tips-list li strong {
+  color: var(--accent-green);
+}
+
+/* ============================================
+   SPECIAL COMPONENTS: Capo warning, strum, etc.
+   ============================================ */
+
+/* Capo warning */
+.capo-warning {
+  background: #3d2a00;
+  border: 1px solid #f0883e;
+  border-radius: 6px;
+  padding: 10px 14px;
+  margin-bottom: var(--space-md);
+  color: #f0883e;
+  font-size: 14px;
+}
+
+/* Strum pattern */
+.strum-pattern {
+  display: flex;
+  align-items: flex-end;
+  gap: var(--space-md);
+  font-size: 20px;
+  background: var(--bg-secondary);
+  padding: var(--space-md);
+  border-radius: 6px;
+  border: 1px solid var(--border);
+}
+
+.strum-beat {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--space-xs);
+}
+
+.strum-arrow {
+  color: var(--accent);
+  font-size: 24px;
+}
+
+.strum-count {
+  font-size: 14px;
+  color: var(--text-secondary);
+}
+
+.strum-miss {
+  color: var(--border);
+}
+
+/* Song structure */
+.structure {
+  font-size: 14px;
+  line-height: 1.8;
+  color: var(--text-secondary);
+}
+
+.structure strong {
+  color: var(--accent);
+}
+
+.structure p {
+  margin-bottom: var(--space-xs);
+}
+
+/* Legend for tab notation */
+.legend {
+  font-size: 13px;
+  color: var(--text-secondary);
+  margin-top: var(--space-md);
+  padding: var(--space-sm) var(--space-md);
+  background: var(--bg-secondary);
+  border-radius: 6px;
+  border: 1px solid var(--border);
+}
+
+.legend code {
+  color: var(--accent-orange);
+  margin-right: var(--space-md);
+  font-family: var(--font-mono);
+}
+
+/* ============================================
+   VIDEO MODAL: Lightbox for hub previews
+   ============================================ */
+
+.video-modal {
+  display: none;
+  position: fixed;
+  inset: 0;
+  z-index: 1000;
+}
+
+.video-modal.active {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.modal-backdrop {
+  position: absolute;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.85);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+}
+
+.modal-content {
+  position: relative;
+  width: 90%;
+  max-width: 900px;
+  z-index: 1;
+}
+
+.modal-close {
+  position: absolute;
+  top: -40px;
+  right: 0;
+  background: none;
+  border: none;
+  color: var(--text-secondary);
+  font-size: 32px;
+  cursor: pointer;
+  padding: 4px 12px;
+  line-height: 1;
+  transition: color 0.2s;
+}
+
+.modal-close:hover {
+  color: var(--text-primary);
+}
+
+.modal-video {
+  aspect-ratio: 16/9;
+  background: #000;
+  border-radius: 12px;
+  overflow: hidden;
+}
+
+.modal-video iframe {
+  width: 100%;
+  height: 100%;
+  border: none;
+}
+
+.modal-open-link {
+  display: inline-block;
+  margin-top: 16px;
+  padding: 10px 20px;
+  background: var(--bg-secondary);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  color: var(--text-primary);
+  font-size: 14px;
+  font-weight: 500;
+  text-decoration: none;
+  transition: all 0.2s;
+}
+
+.modal-open-link:hover {
+  background: var(--accent);
+  border-color: var(--accent);
+  color: #fff;
+  text-decoration: none;
+}
+
+/* ============================================
+   APP SIDEBAR: Main navigation (from guitar-quest)
+   ============================================ */
+
+.app-sidebar {
+  width: 240px;
+  flex-shrink: 0;
+  display: flex;
+  flex-direction: column;
+  background: var(--bg-secondary);
+  border-right: 1px solid var(--border);
+  height: 100vh;
+  position: fixed;
+  left: 0;
+  top: 0;
+  z-index: 100;
+}
+
+/* User Profile */
+.sidebar-profile {
+  padding: 24px 20px;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  border-bottom: 1px solid var(--border);
+}
+
+.profile-icon {
+  width: 40px;
+  height: 40px;
+  background: var(--accent);
+  border-radius: 10px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #000;
+}
+
+.profile-icon svg {
+  width: 22px;
+  height: 22px;
+}
+
+.profile-info {
+  flex: 1;
+}
+
+.profile-name {
+  font-weight: 700;
+  font-size: 16px;
+  color: var(--text-primary);
+  line-height: 1.2;
+}
+
+.profile-rank {
+  font-size: 12px;
+  color: var(--accent-green);
+  font-weight: 600;
+  margin-top: 2px;
+}
+
+/* Navigation Items */
+.sidebar-nav {
+  flex: 1;
+  padding: 16px 12px;
+  overflow-y: auto;
+}
+
+.nav-item {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  width: 100%;
+  padding: 12px 16px;
+  border: none;
+  background: transparent;
+  border-radius: 10px;
+  color: var(--text-secondary);
+  font-size: 14px;
+  font-weight: 500;
+  font-family: inherit;
+  cursor: pointer;
+  transition: all 0.2s;
+  text-decoration: none;
+  margin-bottom: 4px;
+}
+
+.nav-item:hover {
+  background: var(--bg-tertiary);
+  color: var(--text-primary);
+  text-decoration: none;
+}
+
+.nav-item.active {
+  background: var(--accent);
+  color: #000;
+  font-weight: 600;
+}
+
+.nav-item svg {
+  width: 20px;
+  height: 20px;
+  flex-shrink: 0;
+}
+
+.nav-section-label {
+  font-size: 10px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.12em;
+  color: var(--text-muted, rgba(255,255,255,0.35));
+  padding: 16px 16px 4px;
+  margin-top: 4px;
+}
+
+/* Sidebar Footer */
+.sidebar-footer {
+  padding: 16px 12px;
+  border-top: 1px solid var(--border);
+}
+
+.btn-design-mode {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  width: 100%;
+  padding: 12px 16px;
+  background: var(--bg-tertiary);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  color: var(--text-primary);
+  font-size: 13px;
+  font-weight: 500;
+  font-family: inherit;
+  cursor: pointer;
+  transition: all 0.2s;
+  margin-bottom: 8px;
+}
+
+.btn-design-mode:hover {
+  border-color: var(--accent);
+  color: var(--accent);
+}
+
+.btn-design-mode svg {
+  width: 16px;
+  height: 16px;
+}
+
+.btn-logout {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  width: 100%;
+  padding: 12px 16px;
+  background: transparent;
+  border: none;
+  border-radius: 10px;
+  color: #f85149;
+  font-size: 13px;
+  font-weight: 500;
+  font-family: inherit;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.btn-logout:hover {
+  background: rgba(248, 81, 73, 0.1);
+}
+
+.btn-logout svg {
+  width: 16px;
+  height: 16px;
+}
+
+/* Content offset for fixed sidebar */
+body.has-app-sidebar {
+  padding-left: 264px; /* sidebar width (240px) + gap (24px) */
+}
+
+body.has-app-sidebar .page.hub {
+  padding-left: var(--space-lg, 24px);
+  padding-right: var(--space-lg, 24px);
+}
+
+/* Mobile sidebar toggle */
+.sidebar-toggle {
+  display: none;
+  position: fixed;
+  top: 16px;
+  left: 16px;
+  z-index: 101;
+  width: 44px;
+  height: 44px;
+  background: var(--bg-secondary);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  color: var(--text-primary);
+  cursor: pointer;
+  align-items: center;
+  justify-content: center;
+}
+
+.sidebar-toggle svg {
+  width: 24px;
+  height: 24px;
+}
+
+/* Mobile responsive */
+@media (max-width: 768px) {
+  .app-sidebar {
+    transform: translateX(-100%);
+    transition: transform 0.3s ease;
+  }
+
+  .app-sidebar.open {
+    transform: translateX(0);
+  }
+
+  .sidebar-toggle {
+    display: flex;
+  }
+
+  body.has-app-sidebar {
+    padding-left: 0;
+  }
+
+  body.has-app-sidebar .page.hub {
+    padding-left: var(--space-md, 16px);
+    padding-right: var(--space-md, 16px);
+  }
+
+  body.sidebar-open::before {
+    content: '';
+    position: fixed;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.5);
+    z-index: 99;
+  }
+}
+
+/* ============================================
+   LEARN SIDEBAR: Module list (legacy)
+   ============================================ */
+
+.sidebar.learn-sidebar {
+  width: 220px;
+  flex-shrink: 0;
+  padding: 20px;
+  background: var(--bg-secondary);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  height: fit-content;
+  position: sticky;
+  top: 24px;
+}
+
+.sidebar.learn-sidebar h3 {
+  font-size: 12px;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  color: var(--text-muted);
+  margin-bottom: 16px;
+}
+
+.learn-nav details {
+  margin-bottom: 4px;
+}
+
+.learn-nav summary {
+  list-style: none;
+  cursor: pointer;
+  padding: 10px 12px;
+  border-radius: 6px;
+  font-size: 14px;
+  font-weight: 500;
+  color: var(--text-primary);
+  transition: background 0.2s;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.learn-nav summary::-webkit-details-marker {
+  display: none;
+}
+
+.learn-nav summary::before {
+  content: '▸';
+  font-size: 10px;
+  color: var(--text-muted);
+  transition: transform 0.2s;
+}
+
+.learn-nav details[open] summary::before {
+  transform: rotate(90deg);
+}
+
+.learn-nav summary:hover {
+  background: var(--bg-tertiary);
+}
+
+.learn-nav summary .external-link {
+  margin-left: auto;
+  color: var(--text-muted);
+  font-size: 12px;
+  text-decoration: none;
+}
+
+.learn-nav summary .external-link:hover {
+  color: var(--accent);
+}
+
+.learn-nav ul {
+  list-style: none;
+  margin: 4px 0 8px 20px;
+  padding-left: 12px;
+  border-left: 1px solid var(--border);
+}
+
+.learn-nav li {
+  padding: 6px 8px;
+  font-size: 13px;
+  color: var(--text-muted);
+  line-height: 1.4;
+}
+
+.main-content {
+  flex: 1;
+  min-width: 0;
+}
+
+@media (max-width: 768px) {
+  .page.hub {
+    flex-direction: column;
+  }
+  
+  .sidebar {
+    width: 100%;
+    padding: 16px;
+    background: var(--bg-secondary);
+    border-radius: 12px;
+    margin-bottom: 24px;
+  }
+}
+
+/* ============================================
+   LEARN CARDS: JustinGuitar module links
+   ============================================ */
+
+.learn-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  gap: 16px;
+}
+
+.learn-card {
+  display: block;
+  padding: 20px;
+  background: var(--bg-secondary);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  text-decoration: none;
+  transition: all 0.2s;
+}
+
+.learn-card:hover {
+  border-color: var(--accent);
+  transform: translateY(-2px);
+  text-decoration: none;
+}
+
+.learn-title {
+  font-size: 18px;
+  font-weight: 600;
+  color: var(--text-primary);
+  margin-bottom: 8px;
+}
+
+.learn-desc {
+  font-size: 14px;
+  color: var(--text-secondary);
+  line-height: 1.5;
+}
+
+/* ============================================
+   RESPONSIVE: Hub cards + modal
+   ============================================ */
+
+@media (max-width: 600px) {
+  .song-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .song-card {
+    grid-template-columns: 100px 1fr;
+    gap: 12px;
+    padding: 12px;
+  }
+
+  .preview-play {
+    width: 32px;
+    height: 32px;
+  }
+
+  .preview-play svg {
+    width: 12px;
+    height: 12px;
+  }
+
+  .modal-content {
+    width: 95%;
+  }
+
+  .modal-close {
+    top: -36px;
+    font-size: 28px;
+  }
+}

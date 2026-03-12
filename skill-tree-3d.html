@@ -1,0 +1,442 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>3D Explorer - Guitar Club</title>
+  <link rel="stylesheet" href="styles/components.css">
+  <script src="https://unpkg.com/react@18/umd/react.development.js" crossorigin></script>
+  <script src="https://unpkg.com/react-dom@18/umd/react-dom.development.js" crossorigin></script>
+  <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script src="scripts/sidebar.js" defer></script>
+</head>
+<body style="margin:0;display:flex;height:100vh;background:#000;">
+  <guitar-sidebar active="skill-tree-3d"></guitar-sidebar>
+  <div id="root" style="flex:1;overflow:hidden;"></div>
+
+  <script type="text/babel">
+const { useState, useEffect, useRef } = React;
+
+/**
+ * Data structure for our Skill Tree
+ */
+const SKILL_DATA = [
+  {
+    id: 'root',
+    label: 'Parts of the Guitar',
+    description: 'The foundation. The anatomy of your instrument.',
+    x: 0,
+    y: 0,
+    z: 0,
+    status: 'completed',
+    type: 'master',
+    color: 'blue'
+  },
+  {
+    id: 'tuning',
+    label: 'Tuning by Ear',
+    description: 'Tune without digital aids.',
+    x: -300,
+    y: 0,
+    z: 400,
+    status: 'available',
+    type: 'major',
+    color: 'orange',
+    connections: ['root']
+  },
+  {
+    id: 'strings',
+    label: 'String Names',
+    description: 'E-A-D-G-B-E. The map.',
+    x: 200,
+    y: 0,
+    z: 600,
+    status: 'completed',
+    type: 'minor',
+    color: 'cyan',
+    connections: ['root']
+  },
+  {
+    id: 'frets',
+    label: 'Fret Numbers',
+    description: 'Navigation markers.',
+    x: 350,
+    y: 0,
+    z: 900,
+    status: 'completed',
+    type: 'minor',
+    color: 'cyan',
+    connections: ['strings']
+  },
+  {
+    id: 'chords_basic',
+    label: 'Open Chords',
+    description: 'C, G, D, E, A.',
+    x: -200,
+    y: 0,
+    z: 1200,
+    status: 'locked',
+    type: 'major',
+    color: 'red',
+    connections: ['tuning', 'strings']
+  },
+  {
+    id: 'barre',
+    label: 'Barre Chords',
+    description: 'Movable shapes.',
+    x: 150,
+    y: 0,
+    z: 1600,
+    status: 'locked',
+    type: 'major',
+    color: 'red',
+    connections: ['strings', 'frets']
+  },
+  {
+    id: 'scales',
+    label: 'Pentatonic Scale',
+    description: 'Soloing gateway.',
+    x: 0,
+    y: 0,
+    z: 2200,
+    status: 'locked',
+    type: 'master',
+    color: 'purple',
+    connections: ['chords_basic', 'barre']
+  }
+];
+// Constants for 3D Projection
+const FOCAL_LENGTH = 800;
+const CAMERA_HEIGHT = 600; 
+const CAMERA_ANGLE = 0.6; 
+
+/**
+ * 3D Styles Helper
+ */
+const getStarStyles = (colorName, status) => {
+  if (status === 'locked') return {
+    glowColor: 'from-red-900',
+    spikeColor: 'via-red-800',
+    coreColor: 'bg-red-950',
+    beamColor: 'stroke-red-900/30',
+    textColor: 'text-red-200'
+  };
+  
+  switch (colorName) {
+    case 'blue': return {
+      glowColor: 'from-blue-400',
+      spikeColor: 'via-blue-200',
+      coreColor: 'bg-blue-100',
+      beamColor: 'stroke-blue-400',
+      textColor: 'text-blue-100'
+    };
+    case 'cyan': return {
+      glowColor: 'from-cyan-300',
+      spikeColor: 'via-cyan-100',
+      coreColor: 'bg-cyan-50',
+      beamColor: 'stroke-cyan-400',
+      textColor: 'text-cyan-100'
+    };
+    case 'purple': return {
+      glowColor: 'from-fuchsia-400',
+      spikeColor: 'via-fuchsia-200',
+      coreColor: 'bg-fuchsia-100',
+      beamColor: 'stroke-fuchsia-400',
+      textColor: 'text-fuchsia-100'
+    };
+    case 'orange': 
+    default: return {
+      glowColor: 'from-amber-400',
+      spikeColor: 'via-amber-100',
+      coreColor: 'bg-amber-50',
+      beamColor: 'stroke-amber-400',
+      textColor: 'text-amber-100'
+    };
+  }
+};
+const StarNode = ({ node, screenX, screenY, scale, opacity, onClick, isSelected }) => {
+  const s = getStarStyles(node.color, node.status);
+  
+  const isMaster = node.type === 'master';
+  const isMajor = node.type === 'major';
+  
+  const displayScale = Math.max(0.2, Math.min(scale, 4)) * (isMaster ? 2.5 : isMajor ? 1.8 : 1.2);
+
+  return (
+    <div 
+      className={`absolute cursor-pointer group z-20`}
+      style={{ 
+        left: '50%',
+        top: '40%', 
+        transform: `translate3d(${screenX}px, ${screenY}px, 0)`,
+        opacity: opacity,
+        zIndex: Math.floor(scale * 100) + (isSelected ? 1000 : 0),
+        pointerEvents: opacity < 0.1 ? 'none' : 'auto'
+      }}
+      onClick={(e) => {
+        e.stopPropagation();
+        onClick(node);
+      }}
+    >
+      {/* MINIMAL LABEL ON HOVER */}
+      <div className={`absolute -top-16 left-1/2 -translate-x-1/2 whitespace-nowrap pointer-events-none transition-all duration-300 opacity-0 group-hover:opacity-100 group-hover:-translate-y-2`}>
+        <span className="font-cinzel text-xs font-bold tracking-[0.2em] text-white/90 uppercase drop-shadow-[0_0_8px_rgba(0,0,0,1)]">
+           {node.label}
+        </span>
+      </div>
+
+      {/* STAR VISUALS */}
+      <div className="relative flex items-center justify-center mix-blend-screen transition-transform duration-1000"
+           style={{ transform: `scale(${displayScale})` }}>
+        
+        {/* Ambient Halo */}
+        <div className={`absolute w-64 h-64 rounded-full bg-radial ${s.glowColor} to-transparent blur-3xl opacity-40 animate-pulse-slow`} />
+        
+        {/* Core Glow */}
+        <div className={`absolute w-32 h-32 rounded-full bg-radial ${s.glowColor} to-transparent blur-xl opacity-80`} />
+
+        {/* Spikes */}
+        <div className={`absolute w-[2px] h-48 bg-gradient-to-b from-transparent ${s.spikeColor} via-white to-transparent opacity-100 blur-[0.5px]`} />
+        <div className={`absolute h-[2px] w-48 bg-gradient-to-r from-transparent ${s.spikeColor} via-white to-transparent opacity-100 blur-[0.5px]`} />
+
+        {(isMajor || isMaster) && (
+          <>
+            <div className={`absolute w-[1px] h-32 bg-gradient-to-b from-transparent ${s.spikeColor} to-transparent opacity-80 rotate-45 blur-[0.5px]`} />
+            <div className={`absolute w-[1px] h-32 bg-gradient-to-b from-transparent ${s.spikeColor} to-transparent opacity-80 -rotate-45 blur-[0.5px]`} />
+          </>
+        )}
+        
+        {/* Core */}
+        <div className="relative z-10 w-2 h-2 rounded-full bg-white shadow-[0_0_20px_5px_rgba(255,255,255,1)]" />
+      </div>
+
+      {/* Selection Ring (Subtle) */}
+      {isSelected && (
+        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-24 h-24 pointer-events-none"
+             style={{ transform: `scale(${displayScale})` }}>
+           <svg className="w-full h-full animate-spin-slow opacity-60" viewBox="0 0 100 100">
+             <circle cx="50" cy="50" r="48" fill="none" stroke="white" strokeWidth="0.25" strokeDasharray="5 5" />
+           </svg>
+        </div>
+      )}
+    </div>
+  );
+};
+function App() {
+  const [selectedNode, setSelectedNode] = useState(SKILL_DATA[0]);
+  
+  // Camera State
+  const [cameraZ, setCameraZ] = useState(-500); 
+  const [targetZ, setTargetZ] = useState(-500);
+  
+  // Camera X (Lateral Movement)
+  const [cameraX, setCameraX] = useState(0); 
+  const [targetX, setTargetX] = useState(0);
+
+  // Keyboard Event Listener
+  useEffect(() => {
+    const handleKeyDown = (e) => {
+      const stepZ = 100;
+      const stepX = 100;
+      
+      if (e.key === 'ArrowUp' || e.key === 'w') {
+        setTargetZ(prev => Math.min(prev + stepZ, 2500)); 
+      }
+      if (e.key === 'ArrowDown' || e.key === 's') {
+        setTargetZ(prev => Math.max(prev - stepZ, -1000)); 
+      }
+      if (e.key === 'ArrowLeft' || e.key === 'a') {
+        setTargetX(prev => prev - stepX);
+      }
+      if (e.key === 'ArrowRight' || e.key === 'd') {
+        setTargetX(prev => prev + stepX);
+      }
+    };
+    
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, []);
+  // Animation Loop
+  useEffect(() => {
+    let animationFrame;
+    const animate = () => {
+      setCameraZ(prev => {
+        const dist = targetZ - prev;
+        if (Math.abs(dist) < 0.5) return targetZ;
+        return prev + dist * 0.05; 
+      });
+      
+      setCameraX(prev => {
+        const dist = targetX - prev;
+        if (Math.abs(dist) < 0.5) return targetX;
+        return prev + dist * 0.05;
+      });
+
+      animationFrame = requestAnimationFrame(animate);
+    };
+    animationFrame = requestAnimationFrame(animate);
+    return () => cancelAnimationFrame(animationFrame);
+  }, [targetZ, targetX]);
+
+  const handleWheel = (e) => {
+    const speed = 1.5;
+    const delta = e.deltaY * -speed;
+    
+    setTargetZ(prev => {
+      const newZ = prev + delta;
+      return Math.max(-1000, Math.min(newZ, 2500));
+    });
+  };
+  const handleNodeClick = (node) => {
+    setSelectedNode(node);
+    setTargetZ(node.z - 400);
+    setTargetX(node.x);
+  };
+
+  const project = (x, y, z) => {
+    const relX = x - cameraX;
+    const relY = y + CAMERA_HEIGHT; 
+    const relZ = z - cameraZ;
+
+    const cos = Math.cos(CAMERA_ANGLE);
+    const sin = Math.sin(CAMERA_ANGLE);
+    
+    const rotX = relX;
+    const rotY = relY * cos - relZ * sin;
+    const rotZ = relY * sin + relZ * cos;
+
+    if (rotZ < 10) return { visible: false, x: 0, y: 0, scale: 0, opacity: 0 };
+
+    const scale = FOCAL_LENGTH / rotZ;
+    
+    const projectedX = rotX * scale;
+    const projectedY = rotY * scale;
+
+    let opacity = 1;
+    
+    if (rotZ > 3000) opacity = 0;
+    else if (rotZ > 1500) opacity = 1 - ((rotZ - 1500) / 1500);
+
+    if (rotZ < 200) opacity = (rotZ) / 200;
+
+    return { visible: true, x: projectedX, y: projectedY, scale, opacity };
+  };
+  return (
+    <div 
+      className="relative w-full h-screen bg-black overflow-hidden font-sans selection:bg-cyan-500/30"
+      onWheel={handleWheel}
+    >
+      {/* Font Imports */}
+      <style>{`
+        @import url('https://fonts.googleapis.com/css2?family=Cinzel:wght@400;700&family=Exo+2:wght@300;600&display=swap');
+        .font-cinzel { font-family: 'Cinzel', serif; }
+        .font-exo { font-family: 'Exo 2', sans-serif; }
+        
+        @keyframes pulse-slow {
+          0%, 100% { opacity: 0.3; transform: scale(1); }
+          50% { opacity: 0.5; transform: scale(1.1); }
+        }
+        .animate-pulse-slow {
+          animation: pulse-slow 5s ease-in-out infinite;
+        }
+        @keyframes spin-slow {
+          from { transform: rotate(0deg); }
+          to { transform: rotate(360deg); }
+        }
+        .animate-spin-slow {
+          animation: spin-slow 20s linear infinite;
+        }
+      `}</style>
+
+      {/* 1. DEEP SPACE BACKGROUND */}
+      <div className="absolute inset-0 pointer-events-none">
+        <div className="absolute inset-0 bg-black" />
+        <div className="absolute top-[-10%] left-0 w-full h-[50%] bg-[radial-gradient(ellipse_at_top,_var(--tw-gradient-stops))] from-blue-900/10 via-black to-transparent blur-[80px]" />
+        
+        {/* Starfield Grid */}
+        <div className="absolute inset-0 opacity-30 mix-blend-screen pointer-events-none perspective-[1000px]">
+           <div className="absolute inset-0 bg-[linear-gradient(rgba(255,255,255,0.05)_1px,transparent_1px),linear-gradient(90deg,rgba(255,255,255,0.05)_1px,transparent_1px)] bg-[size:100px_100px] [transform:rotateX(60deg)_translateY(-200px)_scale(2)] origin-top"
+                style={{ transform: `perspective(1000px) rotateX(60deg) translateY(${(cameraZ % 100)}px) translateX(${(cameraX % 100)}px) scale(3)` }} />
+        </div>
+      </div>
+      {/* 2. UI OVERLAY */}
+      <div className="absolute top-0 left-0 w-full p-6 z-50 flex justify-between items-start pointer-events-none">
+        <h1 className="text-xl font-cinzel font-bold tracking-[0.2em] text-white/40 uppercase">
+          Constellation
+        </h1>
+        <div className="pointer-events-auto bg-white/5 backdrop-blur-md border border-white/5 px-4 py-1 rounded-full">
+           <span className="font-exo text-[10px] tracking-widest uppercase text-cyan-100/50">Depth: {Math.round(cameraZ + 500)}</span>
+        </div>
+      </div>
+
+      {/* 3. 3D SCENE CONTAINER */}
+      <div className="absolute inset-0 overflow-hidden">
+        
+        {/* CONNECTOR LINES */}
+        <svg className="absolute inset-0 w-full h-full pointer-events-none z-10 overflow-visible mix-blend-screen"
+             style={{ top: '40%' }}> 
+          <defs>
+             <linearGradient id="line-gradient" x1="0%" y1="0%" x2="100%" y2="0%">
+               <stop offset="0%" stopColor="rgba(255,255,255,0)" />
+               <stop offset="50%" stopColor="rgba(255,255,255,0.3)" />
+               <stop offset="100%" stopColor="rgba(255,255,255,0)" />
+             </linearGradient>
+          </defs>
+          {SKILL_DATA.map(node => {
+            if (!node.connections) return null;
+            const start = project(node.x, node.y, node.z);
+            if (!start.visible || start.opacity < 0.1) return null;
+
+            return node.connections.map(targetId => {
+              const targetNode = SKILL_DATA.find(n => n.id === targetId);
+              if (!targetNode) return null;
+              
+              const end = project(targetNode.x, targetNode.y, targetNode.z);
+              if (!end.visible || end.opacity < 0.1) return null;
+              const x1 = start.x + window.innerWidth / 2;
+              const y1 = start.y;
+              const x2 = end.x + window.innerWidth / 2;
+              const y2 = end.y;
+
+              return (
+                <line
+                  key={`${node.id}-${targetId}`}
+                  x1={x1} y1={y1} x2={x2} y2={y2}
+                  stroke="url(#line-gradient)"
+                  strokeWidth={1.5 * start.scale} 
+                  strokeOpacity={Math.min(start.opacity, end.opacity) * 0.4}
+                  strokeLinecap="round"
+                />
+              );
+            });
+          })}
+        </svg>
+
+        {/* NODES */}
+        {SKILL_DATA.map(node => {
+          const p = project(node.x, node.y, node.z);
+          if (!p.visible) return null;
+
+          return (
+            <StarNode 
+              key={node.id} 
+              node={node}
+              screenX={p.x}
+              screenY={p.y}
+              scale={p.scale}
+              opacity={p.opacity}
+              isSelected={selectedNode?.id === node.id}
+              onClick={handleNodeClick}
+            />
+          );
+        })}
+      </div>
+    </div>
+  );
+}
+
+ReactDOM.createRoot(document.getElementById('root')).render(<App />);
+  </script>
+</body>
+</html>

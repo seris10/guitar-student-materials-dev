@@ -1,0 +1,569 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Chord Library - Guitar Club</title>
+  <link rel="stylesheet" href="styles/base.css">
+  <link rel="stylesheet" href="styles/layout.css">
+  <link rel="stylesheet" href="styles/components.css">
+  <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/raphael/2.3.0/raphael.min.js"></script>
+  <script src="https://jtab.tardate.com/javascripts/jtab.js"></script>
+  <script src="scripts/api.js"></script>
+  <script src="scripts/auth.js"></script>
+  <style>
+    .chords-page {
+      min-height: 100vh;
+      padding: 24px 32px 60px;
+      max-width: 1400px;
+      margin: 0 auto;
+    }
+
+    .page-header {
+      margin-bottom: 28px;
+    }
+
+    .page-header h1 {
+      font-size: 2rem;
+      margin-bottom: 8px;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .page-header h1 svg {
+      width: 32px;
+      height: 32px;
+      color: var(--accent);
+    }
+
+    .page-header p {
+      color: var(--text-secondary);
+      font-size: 1.05rem;
+    }
+
+    /* Filter Tabs */
+    .filter-bar {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      gap: 12px;
+      margin-bottom: 28px;
+      padding: 16px 20px;
+      background: var(--bg-secondary);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+    }
+
+    .filter-label {
+      font-size: 0.9rem;
+      color: var(--text-secondary);
+      margin-right: 8px;
+    }
+
+    .letter-tabs {
+      display: flex;
+      gap: 6px;
+      flex-wrap: wrap;
+    }
+
+    .letter-tab {
+      width: 40px;
+      height: 40px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background: var(--bg-tertiary);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      color: var(--text-secondary);
+      font-size: 1rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+
+    .letter-tab:hover {
+      border-color: var(--accent);
+      color: var(--text-primary);
+    }
+
+    .letter-tab.active {
+      background: var(--accent);
+      border-color: var(--accent);
+      color: #000;
+    }
+
+    .type-tabs {
+      display: flex;
+      gap: 4px;
+      margin-left: auto;
+      background: var(--bg-tertiary);
+      padding: 4px;
+      border-radius: 10px;
+    }
+
+    .type-tab {
+      padding: 8px 16px;
+      background: transparent;
+      border: none;
+      border-radius: 8px;
+      color: var(--text-secondary);
+      font-size: 0.85rem;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+
+    .type-tab:hover {
+      color: var(--text-primary);
+    }
+
+    .type-tab.active {
+      background: var(--accent);
+      color: #000;
+      font-weight: 600;
+    }
+
+    /* Stats */
+    .chord-count {
+      color: var(--text-muted);
+      font-size: 0.9rem;
+      margin-bottom: 20px;
+    }
+
+    .chord-count span {
+      color: var(--accent);
+      font-weight: 600;
+    }
+
+    /* Chord Grid */
+    .chord-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+      gap: 16px;
+    }
+
+    .chord-card {
+      background: var(--bg-secondary);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 16px;
+      text-align: center;
+      transition: all 0.2s;
+      cursor: pointer;
+    }
+
+    .chord-card:hover {
+      border-color: var(--accent);
+      transform: translateY(-2px);
+    }
+
+    .chord-card .chord-name {
+      font-size: 1.25rem;
+      font-weight: 700;
+      color: var(--text-primary);
+      margin-bottom: 12px;
+    }
+
+    .chord-card .chord-type {
+      font-size: 0.75rem;
+      color: var(--text-muted);
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      margin-top: 8px;
+    }
+
+    /* jTab overrides for dark theme */
+    .chord-card .jtab {
+      display: flex;
+      justify-content: center;
+    }
+
+    .chord-card .jtab svg {
+      max-width: 100%;
+    }
+
+    .chord-card .jtab svg text {
+      fill: var(--text-primary) !important;
+    }
+
+    .chord-card .jtab svg circle {
+      fill: var(--accent) !important;
+      stroke: var(--accent) !important;
+    }
+
+    .chord-card .jtab svg line,
+    .chord-card .jtab svg path {
+      stroke: var(--text-secondary) !important;
+    }
+
+    .chord-card .jtab svg rect {
+      fill: var(--bg-tertiary) !important;
+      stroke: var(--text-secondary) !important;
+    }
+
+    /* Empty State */
+    .empty-state {
+      text-align: center;
+      padding: 60px 24px;
+      color: var(--text-muted);
+    }
+
+    .empty-state svg {
+      width: 64px;
+      height: 64px;
+      margin-bottom: 16px;
+      opacity: 0.5;
+    }
+
+    .empty-state h3 {
+      font-size: 1.2rem;
+      color: var(--text-secondary);
+      margin-bottom: 8px;
+    }
+
+    /* Section Headers */
+    .section-header {
+      font-size: 1.1rem;
+      color: var(--text-secondary);
+      margin: 32px 0 16px;
+      padding-bottom: 8px;
+      border-bottom: 1px solid var(--border);
+    }
+
+    .section-header:first-of-type {
+      margin-top: 0;
+    }
+
+    @media (max-width: 768px) {
+      .filter-bar {
+        flex-direction: column;
+        align-items: flex-start;
+      }
+
+      .type-tabs {
+        margin-left: 0;
+        margin-top: 12px;
+      }
+
+      .letter-tabs {
+        width: 100%;
+        justify-content: center;
+      }
+    }
+  </style>
+</head>
+<body class="has-app-sidebar">
+
+<!-- Mobile Sidebar Toggle -->
+<button class="sidebar-toggle" id="sidebarToggle" aria-label="Toggle menu">
+  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+    <path d="M3 12h18M3 6h18M3 18h18"/>
+  </svg>
+</button>
+
+<!-- App Sidebar -->
+<nav class="app-sidebar" id="appSidebar">
+  <div class="sidebar-profile">
+    <div class="profile-icon">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+        <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2z"/>
+        <path d="M8 14s1.5 2 4 2 4-2 4-2"/>
+        <circle cx="9" cy="9" r="1" fill="currentColor"/>
+        <circle cx="15" cy="9" r="1" fill="currentColor"/>
+      </svg>
+    </div>
+    <div class="profile-info">
+      <div class="profile-name">Guest</div>
+      <div class="profile-rank">Explorer</div>
+    </div>
+  </div>
+
+  <div class="sidebar-nav">
+    <a href="index.html" class="nav-item" data-page="dashboard">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+        <path d="M22 12h-4l-3 9L9 3l-3 9H2"/>
+      </svg>
+      Dashboard
+    </a>
+    <a href="star-map.html" class="nav-item" data-page="clusters">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+        <circle cx="12" cy="12" r="3"/>
+        <circle cx="5" cy="8" r="2"/>
+        <circle cx="19" cy="8" r="2"/>
+        <circle cx="5" cy="16" r="2"/>
+        <circle cx="19" cy="16" r="2"/>
+      </svg>
+      Clusters
+    </a>
+    <a href="constellation-react.html" class="nav-item" data-page="star-map">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+        <circle cx="12" cy="12" r="10"/>
+        <path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/>
+      </svg>
+      Star Map
+    </a>
+    <a href="constellation-branch1.html" class="nav-item" data-page="foundations">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+        <path d="M12 2L2 7l10 5 10-5-10-5z"/>
+        <path d="M2 17l10 5 10-5"/>
+        <path d="M2 12l10 5 10-5"/>
+      </svg>
+      Foundations
+    </a>
+    <a href="constellation-3d.html" class="nav-item" data-page="3d-map">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+        <path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/>
+        <polyline points="3.27 6.96 12 12.01 20.73 6.96"/>
+        <line x1="12" y1="22.08" x2="12" y2="12"/>
+      </svg>
+      3D Map
+    </a>
+    <a href="chords.html" class="nav-item active" data-page="chords">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+        <rect x="3" y="3" width="7" height="7" rx="1"/>
+        <rect x="14" y="3" width="7" height="7" rx="1"/>
+        <rect x="3" y="14" width="7" height="7" rx="1"/>
+        <rect x="14" y="14" width="7" height="7" rx="1"/>
+      </svg>
+      Chord Library
+    </a>
+    <a href="tuner.html" class="nav-item" data-page="tuner">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+        <path d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z"/>
+        <path d="M19 10v2a7 7 0 0 1-14 0v-2"/>
+        <line x1="12" y1="19" x2="12" y2="23"/>
+        <line x1="8" y1="23" x2="16" y2="23"/>
+      </svg>
+      Tuner
+    </a>
+    <a href="practice-log.html" class="nav-item" data-page="practice">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+        <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/>
+        <polyline points="22 4 12 14.01 9 11.01"/>
+      </svg>
+      Practice Log
+    </a>
+    <a href="song-bank.html" class="nav-item" data-page="songs">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+        <path d="M9 18V5l12-2v13"/>
+        <circle cx="6" cy="18" r="3"/>
+        <circle cx="18" cy="16" r="3"/>
+      </svg>
+      Song Bank
+    </a>
+    <a href="settings.html" class="nav-item" data-page="settings">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+        <circle cx="12" cy="12" r="3"/>
+        <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"/>
+      </svg>
+      Settings
+    </a>
+  </div>
+
+  <div class="sidebar-footer">
+    <a href="login.html" class="nav-item login-btn">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+        <path d="M15 3h4a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2h-4"/>
+        <polyline points="10 17 15 12 10 7"/>
+        <line x1="15" y1="12" x2="3" y2="12"/>
+      </svg>
+      Login
+    </a>
+  </div>
+</nav>
+
+<!-- Main Content -->
+<main class="chords-page">
+  <header class="page-header">
+    <h1>
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+        <rect x="3" y="3" width="7" height="7" rx="1"/>
+        <rect x="14" y="3" width="7" height="7" rx="1"/>
+        <rect x="3" y="14" width="7" height="7" rx="1"/>
+        <rect x="14" y="14" width="7" height="7" rx="1"/>
+      </svg>
+      Chord Library
+    </h1>
+    <p>Visual reference for guitar chords</p>
+  </header>
+
+  <!-- Filter Bar -->
+  <div class="filter-bar">
+    <span class="filter-label">Filter by root:</span>
+    <div class="letter-tabs">
+      <button class="letter-tab active" data-letter="all">All</button>
+      <button class="letter-tab" data-letter="A">A</button>
+      <button class="letter-tab" data-letter="B">B</button>
+      <button class="letter-tab" data-letter="C">C</button>
+      <button class="letter-tab" data-letter="D">D</button>
+      <button class="letter-tab" data-letter="E">E</button>
+      <button class="letter-tab" data-letter="F">F</button>
+      <button class="letter-tab" data-letter="G">G</button>
+    </div>
+
+    <div class="type-tabs">
+      <button class="type-tab active" data-type="all">All</button>
+      <button class="type-tab" data-type="major">Major</button>
+      <button class="type-tab" data-type="minor">Minor</button>
+      <button class="type-tab" data-type="7th">7th</button>
+    </div>
+  </div>
+
+  <p class="chord-count">Showing <span id="chordCount">0</span> chords</p>
+
+  <!-- Chord Grid -->
+  <div class="chord-grid" id="chordGrid">
+    <!-- Populated by JS -->
+  </div>
+</main>
+
+<script>
+  // Chord data
+  const chords = [
+    // A chords
+    { name: 'A', root: 'A', type: 'major', jtab: 'A' },
+    { name: 'Am', root: 'A', type: 'minor', jtab: 'Am' },
+    { name: 'A7', root: 'A', type: '7th', jtab: 'A7' },
+    { name: 'Am7', root: 'A', type: '7th', jtab: 'Am7' },
+    { name: 'Amaj7', root: 'A', type: '7th', jtab: 'Amaj7' },
+    { name: 'Asus2', root: 'A', type: 'major', jtab: 'Asus2' },
+    { name: 'Asus4', root: 'A', type: 'major', jtab: 'Asus4' },
+    
+    // B chords
+    { name: 'B', root: 'B', type: 'major', jtab: 'B' },
+    { name: 'Bm', root: 'B', type: 'minor', jtab: 'Bm' },
+    { name: 'B7', root: 'B', type: '7th', jtab: 'B7' },
+    
+    // C chords
+    { name: 'C', root: 'C', type: 'major', jtab: 'C' },
+    { name: 'Cm', root: 'C', type: 'minor', jtab: 'Cm' },
+    { name: 'C7', root: 'C', type: '7th', jtab: 'C7' },
+    { name: 'Cmaj7', root: 'C', type: '7th', jtab: 'Cmaj7' },
+    { name: 'Cadd9', root: 'C', type: 'major', jtab: 'Cadd9' },
+    
+    // D chords
+    { name: 'D', root: 'D', type: 'major', jtab: 'D' },
+    { name: 'Dm', root: 'D', type: 'minor', jtab: 'Dm' },
+    { name: 'D7', root: 'D', type: '7th', jtab: 'D7' },
+    { name: 'Dm7', root: 'D', type: '7th', jtab: 'Dm7' },
+    { name: 'Dmaj7', root: 'D', type: '7th', jtab: 'Dmaj7' },
+    { name: 'Dsus2', root: 'D', type: 'major', jtab: 'Dsus2' },
+    { name: 'Dsus4', root: 'D', type: 'major', jtab: 'Dsus4' },
+    
+    // E chords
+    { name: 'E', root: 'E', type: 'major', jtab: 'E' },
+    { name: 'Em', root: 'E', type: 'minor', jtab: 'Em' },
+    { name: 'E7', root: 'E', type: '7th', jtab: 'E7' },
+    { name: 'Em7', root: 'E', type: '7th', jtab: 'Em7' },
+    { name: 'Emaj7', root: 'E', type: '7th', jtab: 'Emaj7' },
+    
+    // F chords
+    { name: 'F', root: 'F', type: 'major', jtab: 'F' },
+    { name: 'Fm', root: 'F', type: 'minor', jtab: 'Fm' },
+    { name: 'F7', root: 'F', type: '7th', jtab: 'F7' },
+    { name: 'Fmaj7', root: 'F', type: '7th', jtab: 'Fmaj7' },
+    
+    // G chords
+    { name: 'G', root: 'G', type: 'major', jtab: 'G' },
+    { name: 'Gm', root: 'G', type: 'minor', jtab: 'Gm' },
+    { name: 'G7', root: 'G', type: '7th', jtab: 'G7' },
+    { name: 'Gmaj7', root: 'G', type: '7th', jtab: 'Gmaj7' },
+    { name: 'Gsus4', root: 'G', type: 'major', jtab: 'Gsus4' },
+  ];
+
+  // State
+  let currentLetter = 'all';
+  let currentType = 'all';
+
+  // DOM elements
+  const chordGrid = document.getElementById('chordGrid');
+  const chordCount = document.getElementById('chordCount');
+  const letterTabs = document.querySelectorAll('.letter-tab');
+  const typeTabs = document.querySelectorAll('.type-tab');
+
+  // Render chords
+  function renderChords() {
+    let filtered = chords;
+
+    // Filter by letter
+    if (currentLetter !== 'all') {
+      filtered = filtered.filter(c => c.root === currentLetter);
+    }
+
+    // Filter by type
+    if (currentType !== 'all') {
+      filtered = filtered.filter(c => c.type === currentType);
+    }
+
+    // Update count
+    chordCount.textContent = filtered.length;
+
+    // Render
+    if (filtered.length === 0) {
+      chordGrid.innerHTML = `
+        <div class="empty-state" style="grid-column: 1 / -1;">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <rect x="3" y="3" width="7" height="7" rx="1"/>
+            <rect x="14" y="3" width="7" height="7" rx="1"/>
+            <rect x="3" y="14" width="7" height="7" rx="1"/>
+            <rect x="14" y="14" width="7" height="7" rx="1"/>
+          </svg>
+          <h3>No chords found</h3>
+          <p>Try a different filter</p>
+        </div>
+      `;
+      return;
+    }
+
+    chordGrid.innerHTML = filtered.map(chord => `
+      <div class="chord-card" data-chord="${chord.name}">
+        <div class="chord-name">${chord.name}</div>
+        <div class="jtab chordonly">${chord.jtab}</div>
+        <div class="chord-type">${chord.type}</div>
+      </div>
+    `).join('');
+
+    // Re-render jTab diagrams
+    setTimeout(() => {
+      $('.jtab').each(function() {
+        const el = $(this);
+        if (!el.find('svg').length) {
+          jtab.render(this);
+        }
+      });
+    }, 10);
+  }
+
+  // Letter filter
+  letterTabs.forEach(tab => {
+    tab.addEventListener('click', function() {
+      letterTabs.forEach(t => t.classList.remove('active'));
+      this.classList.add('active');
+      currentLetter = this.dataset.letter;
+      renderChords();
+    });
+  });
+
+  // Type filter
+  typeTabs.forEach(tab => {
+    tab.addEventListener('click', function() {
+      typeTabs.forEach(t => t.classList.remove('active'));
+      this.classList.add('active');
+      currentType = this.dataset.type;
+      renderChords();
+    });
+  });
+
+  // Mobile sidebar toggle
+  document.getElementById('sidebarToggle').addEventListener('click', function() {
+    document.getElementById('appSidebar').classList.toggle('open');
+  });
+
+  // Initialize
+  renderChords();
+</script>
+
+</body>
+</html>

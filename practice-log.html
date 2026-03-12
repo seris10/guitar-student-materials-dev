@@ -1,0 +1,1112 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Practice Log - Guitar Club</title>
+  <link rel="stylesheet" href="styles/base.css">
+  <link rel="stylesheet" href="styles/layout.css">
+  <link rel="stylesheet" href="styles/components.css">
+  <script src="scripts/api.js"></script>
+  <script src="scripts/auth.js"></script>
+  <style>
+    /* Practice Log Page Styles */
+    .practice-page {
+      min-height: 100vh;
+      padding: 24px 32px 60px;
+      max-width: 1200px;
+      margin: 0 auto;
+    }
+
+    .practice-header {
+      margin-bottom: 32px;
+    }
+
+    .practice-header h1 {
+      font-size: 2rem;
+      margin-bottom: 8px;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .practice-header h1 svg {
+      width: 32px;
+      height: 32px;
+      color: var(--accent-green);
+    }
+
+    .practice-header p {
+      color: var(--text-secondary);
+      font-size: 1.05rem;
+    }
+
+    /* Stats Row */
+    .stats-row {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+      gap: 16px;
+      margin-bottom: 32px;
+    }
+
+    .stat-card {
+      background: var(--bg-secondary);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 20px;
+      text-align: center;
+      transition: border-color 0.2s, transform 0.2s;
+    }
+
+    .stat-card:hover {
+      border-color: var(--accent);
+      transform: translateY(-2px);
+    }
+
+    .stat-value {
+      font-size: 1.75rem;
+      font-weight: 700;
+      color: var(--text-primary);
+      margin-bottom: 4px;
+    }
+
+    .stat-value.accent-green { color: var(--accent-green); }
+    .stat-value.accent-blue { color: var(--accent); }
+    .stat-value.accent-orange { color: var(--accent-orange); }
+
+    .stat-label {
+      font-size: 0.85rem;
+      color: var(--text-secondary);
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+
+    /* Main Grid Layout */
+    .practice-grid {
+      display: grid;
+      grid-template-columns: 1fr 380px;
+      gap: 24px;
+    }
+
+    @media (max-width: 900px) {
+      .practice-grid {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    /* Timer Card */
+    .timer-card {
+      background: var(--bg-secondary);
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      padding: 32px;
+      text-align: center;
+      margin-bottom: 24px;
+    }
+
+    .timer-display {
+      font-size: 4rem;
+      font-weight: 300;
+      font-family: 'SF Mono', 'Fira Code', monospace;
+      color: var(--text-primary);
+      margin-bottom: 24px;
+      letter-spacing: 2px;
+    }
+
+    .timer-display.running {
+      color: var(--accent-green);
+    }
+
+    .timer-controls {
+      display: flex;
+      justify-content: center;
+      gap: 16px;
+      margin-bottom: 24px;
+    }
+
+    .timer-btn {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      padding: 14px 28px;
+      border-radius: 12px;
+      font-size: 1rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.2s;
+      border: none;
+    }
+
+    .timer-btn svg {
+      width: 20px;
+      height: 20px;
+    }
+
+    .btn-start {
+      background: var(--accent-green);
+      color: #000;
+    }
+
+    .btn-start:hover {
+      background: #4ade80;
+      transform: scale(1.02);
+    }
+
+    .btn-pause {
+      background: var(--accent-orange);
+      color: #000;
+    }
+
+    .btn-pause:hover {
+      background: #ffb86c;
+    }
+
+    .btn-reset {
+      background: var(--bg-tertiary);
+      color: var(--text-primary);
+      border: 1px solid var(--border);
+    }
+
+    .btn-reset:hover {
+      border-color: var(--accent);
+    }
+
+    .timer-or {
+      color: var(--text-muted);
+      font-size: 0.9rem;
+      margin-bottom: 16px;
+    }
+
+    .manual-entry {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 12px;
+    }
+
+    .manual-entry input {
+      width: 80px;
+      padding: 10px 12px;
+      background: var(--bg-tertiary);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      color: var(--text-primary);
+      font-size: 1rem;
+      text-align: center;
+    }
+
+    .manual-entry input:focus {
+      outline: none;
+      border-color: var(--accent);
+    }
+
+    .manual-entry span {
+      color: var(--text-secondary);
+    }
+
+    /* Log Form */
+    .log-form-card {
+      background: var(--bg-secondary);
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      padding: 24px;
+    }
+
+    .log-form-card h3 {
+      font-size: 1.1rem;
+      margin-bottom: 16px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .log-form-card h3 svg {
+      width: 20px;
+      height: 20px;
+      color: var(--accent);
+    }
+
+    .form-group {
+      margin-bottom: 16px;
+    }
+
+    .form-group label {
+      display: block;
+      font-size: 0.9rem;
+      color: var(--text-secondary);
+      margin-bottom: 8px;
+    }
+
+    .form-group textarea {
+      width: 100%;
+      min-height: 100px;
+      padding: 12px;
+      background: var(--bg-tertiary);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      color: var(--text-primary);
+      font-size: 0.95rem;
+      resize: vertical;
+      font-family: inherit;
+    }
+
+    .form-group textarea:focus {
+      outline: none;
+      border-color: var(--accent);
+    }
+
+    .form-group textarea::placeholder {
+      color: var(--text-muted);
+    }
+
+    .focus-tags {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      margin-bottom: 16px;
+    }
+
+    .focus-tag {
+      padding: 6px 14px;
+      background: var(--bg-tertiary);
+      border: 1px solid var(--border);
+      border-radius: 20px;
+      font-size: 0.85rem;
+      color: var(--text-secondary);
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+
+    .focus-tag:hover {
+      border-color: var(--accent);
+      color: var(--text-primary);
+    }
+
+    .focus-tag.selected {
+      background: var(--accent);
+      border-color: var(--accent);
+      color: #000;
+    }
+
+    .btn-save-session {
+      width: 100%;
+      padding: 14px;
+      background: var(--accent);
+      color: #000;
+      border: none;
+      border-radius: 10px;
+      font-size: 1rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.2s;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+    }
+
+    .btn-save-session:hover {
+      background: #79c0ff;
+      transform: translateY(-1px);
+    }
+
+    .btn-save-session:disabled {
+      opacity: 0.5;
+      cursor: not-allowed;
+      transform: none;
+    }
+
+    .btn-save-session svg {
+      width: 18px;
+      height: 18px;
+    }
+
+    /* History Section */
+    .history-section {
+      margin-top: 32px;
+    }
+
+    .history-section h2 {
+      font-size: 1.25rem;
+      margin-bottom: 16px;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .history-section h2 svg {
+      width: 22px;
+      height: 22px;
+      color: var(--accent);
+    }
+
+    .history-list {
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+
+    .history-entry {
+      background: var(--bg-secondary);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 16px 20px;
+      display: flex;
+      gap: 16px;
+      align-items: flex-start;
+      transition: border-color 0.2s;
+    }
+
+    .history-entry:hover {
+      border-color: var(--accent);
+    }
+
+    .entry-icon {
+      width: 44px;
+      height: 44px;
+      background: var(--bg-tertiary);
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+    }
+
+    .entry-icon svg {
+      width: 22px;
+      height: 22px;
+      color: var(--accent-green);
+    }
+
+    .entry-content {
+      flex: 1;
+      min-width: 0;
+    }
+
+    .entry-header {
+      display: flex;
+      align-items: baseline;
+      gap: 12px;
+      margin-bottom: 6px;
+      flex-wrap: wrap;
+    }
+
+    .entry-duration {
+      font-size: 1.15rem;
+      font-weight: 600;
+      color: var(--text-primary);
+    }
+
+    .entry-date {
+      font-size: 0.85rem;
+      color: var(--text-muted);
+    }
+
+    .entry-tags {
+      display: flex;
+      gap: 6px;
+      flex-wrap: wrap;
+    }
+
+    .entry-tag {
+      padding: 2px 10px;
+      background: var(--bg-tertiary);
+      border-radius: 12px;
+      font-size: 0.75rem;
+      color: var(--text-secondary);
+    }
+
+    .entry-notes {
+      color: var(--text-secondary);
+      font-size: 0.95rem;
+      font-style: italic;
+      line-height: 1.5;
+    }
+
+    .entry-notes::before {
+      content: '"';
+    }
+
+    .entry-notes::after {
+      content: '"';
+    }
+
+    .empty-history {
+      text-align: center;
+      padding: 48px 24px;
+      background: var(--bg-secondary);
+      border: 1px dashed var(--border);
+      border-radius: 12px;
+      color: var(--text-muted);
+    }
+
+    .empty-history svg {
+      width: 48px;
+      height: 48px;
+      margin-bottom: 16px;
+      opacity: 0.5;
+    }
+
+    .empty-history p {
+      font-size: 1rem;
+    }
+
+    /* Motivational Quote */
+    .motivation-card {
+      background: linear-gradient(135deg, rgba(88, 166, 255, 0.1), rgba(63, 185, 80, 0.1));
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 20px;
+      margin-bottom: 24px;
+    }
+
+    .motivation-card p {
+      font-size: 1rem;
+      color: var(--text-primary);
+      font-style: italic;
+      margin-bottom: 8px;
+    }
+
+    .motivation-card .quote-author {
+      font-size: 0.85rem;
+      color: var(--text-secondary);
+      font-style: normal;
+    }
+  </style>
+</head>
+<body class="has-app-sidebar">
+
+<!-- Mobile Sidebar Toggle -->
+<button class="sidebar-toggle" id="sidebarToggle" aria-label="Toggle menu">
+  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+    <path d="M3 12h18M3 6h18M3 18h18"/>
+  </svg>
+</button>
+
+<!-- App Sidebar -->
+<nav class="app-sidebar" id="appSidebar">
+  <div class="sidebar-profile">
+    <div class="profile-icon">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+        <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2z"/>
+        <path d="M8 14s1.5 2 4 2 4-2 4-2"/>
+        <circle cx="9" cy="9" r="1" fill="currentColor"/>
+        <circle cx="15" cy="9" r="1" fill="currentColor"/>
+      </svg>
+    </div>
+    <div class="profile-info">
+      <div class="profile-name">Rocker123</div>
+      <div class="profile-rank">Bedroom Jammer</div>
+    </div>
+  </div>
+
+  <div class="sidebar-nav">
+    <a href="index.html" class="nav-item" data-page="dashboard">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+        <path d="M22 12h-4l-3 9L9 3l-3 9H2"/>
+      </svg>
+      Dashboard
+    </a>
+    <a href="star-map.html" class="nav-item" data-page="clusters">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+        <circle cx="12" cy="12" r="3"/>
+        <circle cx="5" cy="8" r="2"/>
+        <circle cx="19" cy="8" r="2"/>
+        <circle cx="5" cy="16" r="2"/>
+        <circle cx="19" cy="16" r="2"/>
+      </svg>
+      Clusters
+    </a>
+    <a href="constellation-react.html" class="nav-item" data-page="star-map">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+        <circle cx="12" cy="12" r="10"/>
+        <path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/>
+      </svg>
+      Star Map
+    </a>
+    <a href="constellation-branch1.html" class="nav-item" data-page="foundations">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+        <path d="M12 2L2 7l10 5 10-5-10-5z"/>
+        <path d="M2 17l10 5 10-5"/>
+        <path d="M2 12l10 5 10-5"/>
+      </svg>
+      Foundations
+    </a>
+    <a href="constellation-3d.html" class="nav-item" data-page="3d-map">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+        <path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/>
+        <polyline points="3.27 6.96 12 12.01 20.73 6.96"/>
+        <line x1="12" y1="22.08" x2="12" y2="12"/>
+      </svg>
+      3D Map
+    </a>
+    <a href="chords.html" class="nav-item" data-page="chords">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+        <rect x="3" y="3" width="7" height="7" rx="1"/>
+        <rect x="14" y="3" width="7" height="7" rx="1"/>
+        <rect x="3" y="14" width="7" height="7" rx="1"/>
+        <rect x="14" y="14" width="7" height="7" rx="1"/>
+      </svg>
+      Chord Library
+    </a>
+    <a href="tuner.html" class="nav-item" data-page="tuner">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+        <path d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z"/>
+        <path d="M19 10v2a7 7 0 0 1-14 0v-2"/>
+        <line x1="12" y1="19" x2="12" y2="23"/>
+        <line x1="8" y1="23" x2="16" y2="23"/>
+      </svg>
+      Tuner
+    </a>
+    <a href="practice-log.html" class="nav-item active" data-page="practice">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+        <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/>
+        <polyline points="22 4 12 14.01 9 11.01"/>
+      </svg>
+      Practice Log
+    </a>
+    <a href="song-bank.html" class="nav-item" data-page="songs">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+        <path d="M9 18V5l12-2v13"/>
+        <circle cx="6" cy="18" r="3"/>
+        <circle cx="18" cy="16" r="3"/>
+      </svg>
+      Song Bank
+    </a>
+    <a href="settings.html" class="nav-item" data-page="settings">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+        <circle cx="12" cy="12" r="3"/>
+        <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"/>
+      </svg>
+      Settings
+    </a>
+  </div>
+
+  <div class="sidebar-footer">
+    <button class="nav-item design-mode">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+        <circle cx="13.5" cy="6.5" r="0.5" fill="currentColor"/>
+        <circle cx="17.5" cy="10.5" r="0.5" fill="currentColor"/>
+        <circle cx="8.5" cy="7.5" r="0.5" fill="currentColor"/>
+        <circle cx="6.5" cy="12.5" r="0.5" fill="currentColor"/>
+        <path d="M12 2C6.5 2 2 6.5 2 12s4.5 10 10 10c.926 0 1.648-.746 1.648-1.688 0-.437-.18-.835-.437-1.125-.29-.289-.438-.652-.438-1.125a1.64 1.64 0 0 1 1.668-1.668h1.996c3.051 0 5.555-2.503 5.555-5.555C21.965 6.012 17.461 2 12 2z"/>
+      </svg>
+      Design Mode
+    </button>
+    <button class="nav-item logout">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+        <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/>
+        <polyline points="16 17 21 12 16 7"/>
+        <line x1="21" y1="12" x2="9" y2="12"/>
+      </svg>
+      Logout
+    </button>
+  </div>
+</nav>
+
+<!-- Main Content -->
+<main class="practice-page">
+  <header class="practice-header">
+    <h1>
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+        <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/>
+        <polyline points="22 4 12 14.01 9 11.01"/>
+      </svg>
+      Practice Log
+    </h1>
+    <p>Track your progress and build consistent habits</p>
+  </header>
+
+  <!-- Stats Row -->
+  <div class="stats-row">
+    <div class="stat-card">
+      <div class="stat-value accent-blue" id="statWeek">0</div>
+      <div class="stat-label">Minutes This Week</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-value" id="statMonth">0 min</div>
+      <div class="stat-label">This Month</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-value accent-green" id="statSessions">0</div>
+      <div class="stat-label">Total Sessions</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-value accent-orange" id="statStreak">0 🔥</div>
+      <div class="stat-label">Day Streak</div>
+    </div>
+  </div>
+
+  <div class="practice-grid">
+    <!-- Left Column: Timer + History -->
+    <div class="practice-main">
+      <!-- Timer Card -->
+      <div class="timer-card">
+        <div class="timer-display" id="timerDisplay">00:00:00</div>
+        <div class="timer-controls">
+          <button class="timer-btn btn-start" id="btnStart">
+            <svg viewBox="0 0 24 24" fill="currentColor">
+              <path d="M8 5v14l11-7z"/>
+            </svg>
+            Start
+          </button>
+          <button class="timer-btn btn-pause" id="btnPause" style="display: none;">
+            <svg viewBox="0 0 24 24" fill="currentColor">
+              <rect x="6" y="4" width="4" height="16"/>
+              <rect x="14" y="4" width="4" height="16"/>
+            </svg>
+            Pause
+          </button>
+          <button class="timer-btn btn-reset" id="btnReset">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"/>
+              <path d="M3 3v5h5"/>
+            </svg>
+            Reset
+          </button>
+        </div>
+        <div class="timer-or">— or enter manually —</div>
+        <div class="manual-entry">
+          <input type="number" id="manualMinutes" placeholder="0" min="1" max="999">
+          <span>minutes</span>
+        </div>
+      </div>
+
+      <!-- History Section -->
+      <section class="history-section">
+        <h2>
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <circle cx="12" cy="12" r="10"/>
+            <polyline points="12 6 12 12 16 14"/>
+          </svg>
+          Practice History
+        </h2>
+        <div class="history-list" id="historyList">
+          <!-- Populated from localStorage by JS -->
+        </div>
+      </section>
+    </div>
+
+    <!-- Right Column: Log Form -->
+    <div class="practice-sidebar">
+      <!-- Motivation Quote -->
+      <div class="motivation-card">
+        <p>"The only way to do great work is to love what you do."</p>
+        <span class="quote-author">— Steve Jobs</span>
+      </div>
+
+      <!-- Log Form -->
+      <div class="log-form-card">
+        <h3>
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/>
+            <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/>
+          </svg>
+          Log Session
+        </h3>
+
+        <label style="display: block; font-size: 0.9rem; color: var(--text-secondary); margin-bottom: 8px;">What did you focus on?</label>
+        <div class="focus-tags">
+          <button class="focus-tag" data-tag="chords">Chords</button>
+          <button class="focus-tag" data-tag="strumming">Strumming</button>
+          <button class="focus-tag" data-tag="picking">Picking</button>
+          <button class="focus-tag" data-tag="scales">Scales</button>
+          <button class="focus-tag" data-tag="songs">Songs</button>
+          <button class="focus-tag" data-tag="theory">Theory</button>
+          <button class="focus-tag" data-tag="technique">Technique</button>
+          <button class="focus-tag" data-tag="ear-training">Ear Training</button>
+        </div>
+
+        <div class="form-group">
+          <label for="sessionNotes">Reflection / Notes</label>
+          <textarea id="sessionNotes" placeholder="What went well? What was challenging? Any breakthroughs?"></textarea>
+        </div>
+
+        <button class="btn-save-session" id="btnSaveSession">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"/>
+            <polyline points="17 21 17 13 7 13 7 21"/>
+            <polyline points="7 3 7 8 15 8"/>
+          </svg>
+          Save Practice Session
+        </button>
+      </div>
+    </div>
+  </div>
+</main>
+
+<script>
+  // Timer State
+  let timerInterval = null;
+  let elapsedSeconds = 0;
+  let isRunning = false;
+
+  // DOM Elements
+  const timerDisplay = document.getElementById('timerDisplay');
+  const btnStart = document.getElementById('btnStart');
+  const btnPause = document.getElementById('btnPause');
+  const btnReset = document.getElementById('btnReset');
+  const manualMinutes = document.getElementById('manualMinutes');
+  const btnSaveSession = document.getElementById('btnSaveSession');
+  const sessionNotes = document.getElementById('sessionNotes');
+  const focusTags = document.querySelectorAll('.focus-tag');
+
+  // Format seconds to HH:MM:SS
+  function formatTime(totalSeconds) {
+    const hours = Math.floor(totalSeconds / 3600);
+    const minutes = Math.floor((totalSeconds % 3600) / 60);
+    const seconds = totalSeconds % 60;
+    return [hours, minutes, seconds]
+      .map(v => v.toString().padStart(2, '0'))
+      .join(':');
+  }
+
+  // Update display
+  function updateDisplay() {
+    timerDisplay.textContent = formatTime(elapsedSeconds);
+  }
+
+  // Start timer
+  btnStart.addEventListener('click', function() {
+    if (!isRunning) {
+      isRunning = true;
+      timerDisplay.classList.add('running');
+      btnStart.style.display = 'none';
+      btnPause.style.display = 'flex';
+      
+      timerInterval = setInterval(function() {
+        elapsedSeconds++;
+        updateDisplay();
+      }, 1000);
+    }
+  });
+
+  // Pause timer
+  btnPause.addEventListener('click', function() {
+    if (isRunning) {
+      isRunning = false;
+      timerDisplay.classList.remove('running');
+      btnPause.style.display = 'none';
+      btnStart.style.display = 'flex';
+      btnStart.innerHTML = `
+        <svg viewBox="0 0 24 24" fill="currentColor">
+          <path d="M8 5v14l11-7z"/>
+        </svg>
+        Resume
+      `;
+      clearInterval(timerInterval);
+    }
+  });
+
+  // Reset timer
+  btnReset.addEventListener('click', function() {
+    isRunning = false;
+    elapsedSeconds = 0;
+    timerDisplay.classList.remove('running');
+    btnPause.style.display = 'none';
+    btnStart.style.display = 'flex';
+    btnStart.innerHTML = `
+      <svg viewBox="0 0 24 24" fill="currentColor">
+        <path d="M8 5v14l11-7z"/>
+      </svg>
+      Start
+    `;
+    clearInterval(timerInterval);
+    updateDisplay();
+  });
+
+  // Focus tag selection
+  focusTags.forEach(tag => {
+    tag.addEventListener('click', function() {
+      this.classList.toggle('selected');
+    });
+  });
+
+  // Get selected tags
+  function getSelectedTags() {
+    return Array.from(document.querySelectorAll('.focus-tag.selected'))
+      .map(tag => tag.dataset.tag);
+  }
+
+  // Save session
+  btnSaveSession.addEventListener('click', async function() {
+    // Get duration from timer or manual entry
+    let minutes = Math.floor(elapsedSeconds / 60);
+    
+    if (manualMinutes.value && parseInt(manualMinutes.value) > 0) {
+      minutes = parseInt(manualMinutes.value);
+    }
+
+    if (minutes < 1) {
+      alert('Please start the timer or enter practice duration manually.');
+      return;
+    }
+
+    const notes = sessionNotes.value.trim();
+    const tags = getSelectedTags();
+
+    // Create entry object
+    const entry = {
+      id: Date.now(),
+      minutes: minutes,
+      date: new Date().toISOString(),
+      notes: notes || 'No notes',
+      tags: tags
+    };
+
+    // Save to GuitarAPI if authenticated, otherwise localStorage
+    let savedToAPI = false;
+    if (typeof GuitarAPI !== 'undefined' && GuitarAPI.savePractice && GuitarAPI.isOnline()) {
+      try {
+        const result = await GuitarAPI.savePractice({
+          minutes: minutes,
+          notes: notes,
+          tags: tags
+        });
+        savedToAPI = result && !result.local;
+      } catch (err) {
+        console.log('GuitarAPI save failed, falling back to localStorage:', err);
+      }
+    }
+
+    // Only write to localStorage if API save didn't succeed
+    if (!savedToAPI) {
+      const history = JSON.parse(localStorage.getItem('practiceHistory') || '[]');
+      history.unshift(entry);
+      localStorage.setItem('practiceHistory', JSON.stringify(history));
+    }
+
+    // Reset form
+    elapsedSeconds = 0;
+    updateDisplay();
+    manualMinutes.value = '';
+    sessionNotes.value = '';
+    focusTags.forEach(tag => tag.classList.remove('selected'));
+    btnStart.innerHTML = `
+      <svg viewBox="0 0 24 24" fill="currentColor">
+        <path d="M8 5v14l11-7z"/>
+      </svg>
+      Start
+    `;
+
+    // Show confirmation
+    alert('Practice session saved! 🎸');
+    
+    // Reload history
+    loadHistory();
+    updateStats();
+  });
+
+  // Format date for display
+  function formatDate(isoString) {
+    const date = new Date(isoString);
+    const now = new Date();
+    const yesterday = new Date(now);
+    yesterday.setDate(yesterday.getDate() - 1);
+
+    if (date.toDateString() === now.toDateString()) {
+      return 'Today, ' + date.toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit' });
+    } else if (date.toDateString() === yesterday.toDateString()) {
+      return 'Yesterday, ' + date.toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit' });
+    } else {
+      return date.toLocaleDateString('en-US', { month: 'short', day: 'numeric' }) + 
+             ', ' + date.toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit' });
+    }
+  }
+
+  // Load history from GuitarAPI or localStorage
+  async function loadHistory() {
+    let history = [];
+    
+    // Try GuitarAPI first (if online/authenticated)
+    if (typeof GuitarAPI !== 'undefined' && GuitarAPI.getPracticeHistory) {
+      try {
+        history = await GuitarAPI.getPracticeHistory();
+        if (history && history.length > 0) {
+          // Successfully got API data
+        } else {
+          // API returned empty, fall back to localStorage
+          history = JSON.parse(localStorage.getItem('practiceHistory') || '[]');
+        }
+      } catch (err) {
+        console.log('GuitarAPI load failed, using localStorage:', err);
+        history = JSON.parse(localStorage.getItem('practiceHistory') || '[]');
+      }
+    } else {
+      // GuitarAPI not available, use localStorage
+      history = JSON.parse(localStorage.getItem('practiceHistory') || '[]');
+    }
+    
+    const historyList = document.getElementById('historyList');
+
+    if (history.length === 0) {
+      historyList.innerHTML = `
+        <div class="empty-history">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <circle cx="12" cy="12" r="10"/>
+            <polyline points="12 6 12 12 16 14"/>
+          </svg>
+          <p>No practice sessions yet. Start your first one!</p>
+        </div>
+      `;
+      return;
+    }
+
+    historyList.innerHTML = history.slice(0, 10).map(entry => `
+      <div class="history-entry">
+        <div class="entry-icon">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/>
+            <polyline points="22 4 12 14.01 9 11.01"/>
+          </svg>
+        </div>
+        <div class="entry-content">
+          <div class="entry-header">
+            <span class="entry-duration">${entry.minutes} mins</span>
+            <span class="entry-date">${formatDate(entry.date)}</span>
+            <div class="entry-tags">
+              ${entry.tags.map(tag => `<span class="entry-tag">${tag}</span>`).join('')}
+            </div>
+          </div>
+          <p class="entry-notes">${entry.notes}</p>
+        </div>
+      </div>
+    `).join('');
+  }
+
+  // Update stats
+  async function updateStats() {
+    let weekMinutes = 0;
+    let monthMinutes = 0;
+    let totalSessions = 0;
+    let streak = 0;
+    
+    // Try GuitarAPI first (if online/authenticated)
+    if (typeof GuitarAPI !== 'undefined' && GuitarAPI.getPracticeStats) {
+      try {
+        const stats = await GuitarAPI.getPracticeStats();
+        if (stats) {
+          weekMinutes = stats.weekMinutes || 0;
+          monthMinutes = stats.monthMinutes || 0;
+          totalSessions = stats.totalSessions || 0;
+          streak = stats.streak || 0;
+        } else {
+          throw new Error('No stats returned from API');
+        }
+      } catch (err) {
+        console.log('GuitarAPI stats failed, computing from localStorage:', err);
+        // Fall through to localStorage calculation
+      }
+    }
+    
+    // Fallback: compute from localStorage if API didn't provide stats
+    if (weekMinutes === 0 && monthMinutes === 0 && totalSessions === 0) {
+      const history = JSON.parse(localStorage.getItem('practiceHistory') || '[]');
+      const now = new Date();
+      
+      // This week (Sunday to Saturday)
+      const weekStart = new Date(now);
+      weekStart.setDate(now.getDate() - now.getDay());
+      weekStart.setHours(0, 0, 0, 0);
+      
+      weekMinutes = history
+        .filter(e => new Date(e.date) >= weekStart)
+        .reduce((sum, e) => sum + e.minutes, 0);
+      
+      // This month
+      const monthStart = new Date(now.getFullYear(), now.getMonth(), 1);
+      monthMinutes = history
+        .filter(e => new Date(e.date) >= monthStart)
+        .reduce((sum, e) => sum + e.minutes, 0);
+      
+      // Total sessions
+      totalSessions = history.length;
+      
+      // Calculate streak
+      streak = calculateStreak(history);
+    }
+    
+    // Update DOM
+    document.getElementById('statWeek').textContent = weekMinutes;
+    document.getElementById('statMonth').textContent = 
+      monthMinutes >= 60 ? (monthMinutes / 60).toFixed(1) + ' hrs' : monthMinutes + ' min';
+    document.getElementById('statSessions').textContent = totalSessions;
+    document.getElementById('statStreak').textContent = streak + ' 🔥';
+  }
+
+  // Calculate current streak
+  function calculateStreak(history) {
+    if (history.length === 0) return 0;
+    
+    let streak = 0;
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+    
+    // Get unique practice dates
+    const practiceDates = [...new Set(
+      history.map(e => {
+        const d = new Date(e.date);
+        d.setHours(0, 0, 0, 0);
+        return d.getTime();
+      })
+    )].sort((a, b) => b - a);
+    
+    // Check if practiced today or yesterday
+    const latestDate = new Date(practiceDates[0]);
+    const diffDays = Math.floor((today - latestDate) / (1000 * 60 * 60 * 24));
+    
+    if (diffDays > 1) return 0; // Streak broken
+    
+    // Count consecutive days
+    let checkDate = new Date(practiceDates[0]);
+    for (let i = 0; i < practiceDates.length; i++) {
+      const practiceDate = new Date(practiceDates[i]);
+      const expectedDate = new Date(checkDate);
+      expectedDate.setDate(expectedDate.getDate() - i);
+      expectedDate.setHours(0, 0, 0, 0);
+      
+      if (practiceDate.getTime() === expectedDate.getTime()) {
+        streak++;
+      } else {
+        break;
+      }
+    }
+    
+    return streak;
+  }
+
+  // Motivational quotes
+  const quotes = [
+    { text: "The only way to do great work is to love what you do.", author: "Steve Jobs" },
+    { text: "Practice doesn't make perfect. Practice makes progress.", author: "Unknown" },
+    { text: "Every expert was once a beginner.", author: "Helen Hayes" },
+    { text: "Music expresses that which cannot be put into words.", author: "Victor Hugo" },
+    { text: "The beautiful thing about learning is nobody can take it away from you.", author: "B.B. King" },
+    { text: "It's not about being the best. It's about being better than you were yesterday.", author: "Unknown" },
+    { text: "Don't practice until you get it right. Practice until you can't get it wrong.", author: "Unknown" }
+  ];
+
+  // Set random quote
+  function setRandomQuote() {
+    const quote = quotes[Math.floor(Math.random() * quotes.length)];
+    const card = document.querySelector('.motivation-card');
+    card.innerHTML = `
+      <p>"${quote.text}"</p>
+      <span class="quote-author">— ${quote.author}</span>
+    `;
+  }
+
+  // Mobile sidebar toggle
+  document.getElementById('sidebarToggle').addEventListener('click', function() {
+    document.getElementById('appSidebar').classList.toggle('open');
+  });
+
+  // Initialize
+  setRandomQuote();
+  loadHistory();
+  updateStats();
+</script>
+
+</body>
+</html>

@@ -1,0 +1,127 @@
+/* ============================================
+   Guitar Club - Song Page Styles
+   Requires: base.css (provides tokens via aliases)
+   ============================================ */
+
+/* Song page link transitions (base.css doesn't add these) */
+a { transition: color 0.2s ease; }
+a:hover { color: var(--accent-hover); }
+
+/* Layout */
+.container { max-width: var(--container-width); margin: 0 auto; padding: 40px 24px; }
+section { margin-bottom: 64px; scroll-margin-top: 100px; }
+
+/* Back Navigation */
+.back-nav { margin-bottom: 32px; }
+.back-link {
+  display: inline-flex; align-items: center; gap: 8px;
+  color: var(--text-secondary); font-size: 14px; font-weight: 500;
+  padding: 8px 12px; margin-left: -12px; border-radius: var(--radius-sm);
+}
+.back-link:hover { background: var(--bg-surface); color: var(--text-primary); text-decoration: none; }
+
+/* Header */
+header { margin-bottom: 40px; }
+h1 {
+  font-size: 40px; font-weight: 700; letter-spacing: -0.02em; margin-bottom: 8px;
+  background: linear-gradient(to right, #fff, #a5b4fc);
+  -webkit-background-clip: text; -webkit-text-fill-color: transparent; line-height: 1.2;
+}
+.artist { font-size: 20px; color: var(--text-secondary); font-weight: 400; }
+
+/* Meta Grid */
+.meta-grid {
+  display: grid; grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+  gap: 16px; margin-top: 32px; padding: 20px;
+  background: var(--bg-surface); border: 1px solid var(--border-color); border-radius: var(--radius-md);
+}
+.meta-item { display: flex; flex-direction: column; gap: 4px; }
+.meta-label { font-size: 12px; text-transform: uppercase; letter-spacing: 0.05em; color: var(--text-secondary); font-weight: 600; }
+.meta-value { font-weight: 500; color: var(--text-primary); }
+
+/* Capo Badge */
+.capo-badge {
+  display: inline-flex; align-items: center; gap: 8px; margin-top: 16px; padding: 8px 16px;
+  background: rgba(210, 153, 34, 0.15); border: 1px solid rgba(210, 153, 34, 0.4);
+  color: #e3b341; border-radius: 100px; font-size: 14px; font-weight: 500;
+}
+
+/* Section Headings */
+h2 { font-size: 24px; font-weight: 600; margin-bottom: 24px; display: flex; align-items: center; gap: 12px; color: var(--text-primary); }
+h2::before { content: ''; display: block; width: 4px; height: 24px; background: var(--accent-color); border-radius: 2px; }
+
+/* Video Player */
+.video-wrapper {
+  position: relative; width: 100%; border-radius: var(--radius-lg); overflow: hidden;
+  aspect-ratio: 16/9; background: #000; box-shadow: 0 8px 30px rgba(0,0,0,0.5); border: 1px solid var(--border-color);
+}
+.video-thumbnail { width: 100%; height: 100%; object-fit: cover; opacity: 0.9; transition: opacity 0.3s; cursor: pointer; }
+.video-wrapper:hover .video-thumbnail { opacity: 0.7; }
+.video-play-btn {
+  position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%);
+  width: 80px; height: 80px; background: rgba(255,255,255,0.1); backdrop-filter: blur(4px);
+  border-radius: 50%; display: flex; align-items: center; justify-content: center;
+  pointer-events: none; transition: transform 0.2s ease, background 0.2s; border: 1px solid rgba(255,255,255,0.2);
+}
+.video-play-btn svg { width: 32px; height: 32px; fill: #fff; margin-left: 4px; }
+.video-wrapper:hover .video-play-btn { transform: translate(-50%, -50%) scale(1.1); background: var(--accent-color); border-color: var(--accent-color); }
+.video-popout-btn {
+  position: absolute; top: 16px; right: 16px; background: rgba(0,0,0,0.6); backdrop-filter: blur(4px);
+  color: #fff; border: none; padding: 6px 12px; border-radius: 6px; font-size: 12px; font-weight: 500;
+  cursor: pointer; opacity: 0; transform: translateY(-10px); transition: all 0.2s;
+}
+.video-wrapper:hover .video-popout-btn { opacity: 1; transform: translateY(0); }
+.video-wrapper iframe { width: 100%; height: 100%; border: none; }
+
+/* Strumming Pattern */
+.strum-container {
+  background: var(--bg-surface); border: 1px solid var(--border-color); border-radius: var(--radius-md);
+  padding: 32px; display: flex; flex-wrap: wrap; gap: 12px; align-items: flex-end; justify-content: center;
+}
+.beat-group { display: flex; flex-direction: column; align-items: center; gap: 12px; min-width: 40px; }
+.strum-arrow { font-size: 32px; line-height: 1; height: 32px; color: var(--accent-color); font-weight: bold; }
+.strum-arrow.miss { color: var(--border-color); font-size: 24px; }
+.beat-count { font-family: var(--font-mono); font-size: 14px; color: var(--text-muted); border-top: 2px solid var(--border-color); width: 100%; text-align: center; padding-top: 8px; }
+.beat-count.main { color: var(--text-secondary); border-color: var(--text-muted); }
+
+/* Chord Cards */
+.chord-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(140px, 1fr)); gap: 20px; }
+.chord-card {
+  background: var(--bg-surface); border: 1px solid var(--border-color); border-radius: var(--radius-md);
+  padding: 16px; display: flex; flex-direction: column; align-items: center; transition: transform 0.2s, border-color 0.2s;
+}
+.chord-card:hover { border-color: var(--accent-color); transform: translateY(-2px); }
+.chord-card h3 { font-size: 18px; font-weight: 700; color: var(--accent-color); margin-bottom: 12px; }
+
+/* jTab Overrides */
+.jtab { margin-bottom: 0 !important; }
+.jtab svg text { fill: var(--text-secondary) !important; font-family: var(--font-sans) !important; font-weight: 600 !important; }
+.jtab svg path, .jtab svg line, .jtab svg rect { stroke: var(--text-muted) !important; }
+.jtab svg circle { fill: var(--accent-color) !important; stroke: var(--accent-color) !important; }
+
+/* Song Structure */
+.structure-list { background: var(--bg-surface); border: 1px solid var(--border-color); border-radius: var(--radius-md); padding: 8px 0; }
+.structure-item { padding: 16px 24px; display: flex; border-bottom: 1px solid var(--border-color); }
+.structure-item:last-child { border-bottom: none; }
+.part-name { width: 100px; font-weight: 600; color: var(--accent-color); flex-shrink: 0; }
+.part-detail { color: var(--text-secondary); font-family: var(--font-mono); font-size: 14px; }
+
+/* Legend */
+.legend { display: flex; flex-wrap: wrap; gap: 16px; margin-top: 16px; padding: 16px 20px; background: var(--bg-surface); border: 1px solid var(--border-color); border-radius: var(--radius-md); }
+.legend-item { display: flex; align-items: center; gap: 8px; font-size: 14px; }
+.legend-item code { font-family: var(--font-mono); color: var(--accent-orange); font-weight: 600; }
+.legend-item span { color: var(--text-secondary); }
+
+/* Footer */
+footer { text-align: center; color: var(--text-muted); margin-top: 80px; padding-top: 40px; border-top: 1px solid var(--border-color); font-size: 14px; }
+
+/* Responsive */
+@media (max-width: 768px) {
+  .container { padding: 24px 16px; }
+  h1 { font-size: 32px; }
+  .meta-grid { grid-template-columns: 1fr; gap: 12px; }
+  .sticky-nav-container { top: 10px; }
+  .section-nav { width: 100%; overflow-x: auto; border-radius: 12px; padding: 12px; }
+  .section-nav a { flex-shrink: 0; }
+  .strum-container { gap: 8px; padding: 20px 10px; }
+}

@@ -1,0 +1,647 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Sky Map - Guitar Club</title>
+  <link rel="stylesheet" href="styles/components.css">
+  <script src="https://unpkg.com/react@18/umd/react.development.js" crossorigin></script>
+  <script src="https://unpkg.com/react-dom@18/umd/react-dom.development.js" crossorigin></script>
+  <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script src="scripts/sidebar.js" defer></script>
+</head>
+<body style="margin:0;display:flex;height:100vh;background:#000;">
+  <guitar-sidebar active="sky-map-canvas"></guitar-sidebar>
+  <div id="root" style="flex:1;overflow:hidden;"></div>
+
+  <script type="text/babel">
+const { useState, useEffect, useRef, useMemo } = React;
+// --- DATA STRUCTURE ---
+// FULL DATASET from JustinGuitar Grade 1
+const rawData = {
+  modules: [
+    {
+      id: "m0",
+      title: "The Foundation",
+      description: "Before You Begin: Guitar Basics",
+      lessons: [
+        { id: "m0-1", title: "How To Tune", type: "core", status: "completed" },
+        { id: "m0-2", title: "Hold Your Guitar", type: "core", status: "completed" },
+        { id: "m0-3", title: "Positive Finger Placement", type: "technique", status: "completed" },
+        { id: "m0-4", title: "Read Chord Boxes", type: "theory", status: "completed" },
+        { id: "m0-5", title: "Hold a Pick", type: "technique", status: "completed" },
+        { id: "m0-6", title: "Strum Without Pick", type: "technique", status: "completed" },
+      ]
+    },
+    {
+      id: "m1",
+      title: "The First Chords",
+      description: "A & D Chords: Play Your First Song!",
+      lessons: [
+        { id: "m1-1", title: "The D Chord", type: "chord", status: "completed" },
+        { id: "m1-2", title: "The A Chord", type: "chord", status: "completed" },
+        { id: "m1-3", title: "Anchor Fingers", type: "technique", status: "completed" },
+        { id: "m1-4", title: "1-Minute Changes", type: "exercise", status: "completed" },
+        { id: "m1-5", title: "Bars & Strumming on 1", type: "rhythm", status: "completed" },
+        { id: "m1-6", title: "Strum Correct Strings", type: "technique", status: "completed" },
+        { id: "m1-7", title: "Minimize Finger Pain", type: "tips", status: "completed" },
+        { id: "m1-8", title: "Super Easy 2 Chord Songs", type: "song", status: "completed" },
+        { id: "m1-9", title: "Justin's Song App", type: "tool", status: "completed" },
+        { id: "m1-10", title: "Module 1 Practice Routine", type: "practice", status: "completed" },
+        { id: "m1-11", title: "Using Practice Assistant", type: "tool", status: "completed" },
+        { id: "m1-12", title: "When to move on?", type: "tips", status: "completed" },
+      ]
+    },
+    {
+      id: "m2",
+      title: "The Rhythm",
+      description: "Rhythm & Chord Changes + Your First Riff",
+      lessons: [
+        { id: "m2-1", title: "The E Chord", type: "chord", status: "completed" },
+        { id: "m2-2", title: "E Chord Anchors", type: "technique", status: "active" }, 
+        { id: "m2-3", title: "Tapping Your Foot", type: "rhythm", status: "active" },
+        { id: "m2-4", title: "Strumming Mechanics", type: "technique", status: "active" },
+        { id: "m2-5", title: "Strumming On The Beat", type: "rhythm", status: "locked" },
+        { id: "m2-6", title: "Chord Changes For One", type: "exercise", status: "locked" },
+        { id: "m2-7", title: "Peter Gunn Theme", type: "song", status: "locked" },
+        { id: "m2-8", title: "Songs For Module 2", type: "song", status: "locked" },
+        { id: "m2-9", title: "Module 2 Practice Routine", type: "practice", status: "locked" },
+      ]
+    },
+    {
+      id: "m3",
+      title: "The Minor",
+      description: "Capo, Minor Chords & Up Strums",
+      lessons: [
+        { id: "m3-1", title: "What Are Minor Chords", type: "theory", status: "locked" },
+        { id: "m3-2", title: "The E Minor Chord", type: "chord", status: "locked" },
+        { id: "m3-3", title: "The A Minor Chord", type: "chord", status: "locked" },
+        { id: "m3-4", title: "Holding the Guitar", type: "technique", status: "locked" },
+        { id: "m3-5", title: "Counting Ands", type: "rhythm", status: "locked" },
+        { id: "m3-6", title: "All About Up Strums", type: "rhythm", status: "locked" },
+        { id: "m3-7", title: "Strumming Patterns + Ups", type: "rhythm", status: "locked" },
+        { id: "m3-8", title: "All About Capos", type: "tool", status: "locked" },
+        { id: "m3-9", title: "Seven Nation Army", type: "song", status: "locked" },
+        { id: "m3-10", title: "Songs For Module 3", type: "song", status: "locked" },
+        { id: "m3-11", title: "Module 3 Practice Routine", type: "practice", status: "locked" },
+      ]
+    },
+    {
+      id: "m4",
+      title: "The Timekeeper",
+      description: "Metronome, Stretches & THE Pattern",
+      lessons: [
+        { id: "m4-1", title: "Beginner Finger Stretches", type: "exercise", status: "locked" },
+        { id: "m4-2", title: "The D Minor Chord", type: "chord", status: "locked" },
+        { id: "m4-3", title: "Meet The Metronome", type: "tool", status: "locked" },
+        { id: "m4-4", title: "THE Strumming Pattern", type: "rhythm", key: true, status: "locked" }, 
+        { id: "m4-5", title: "How To Read Guitar TAB", type: "theory", status: "locked" },
+        { id: "m4-6", title: "Sunshine Of Your Love", type: "song", status: "locked" },
+        { id: "m4-7", title: "Songs For Module 4", type: "song", status: "locked" },
+        { id: "m4-8", title: "Module 4 Practice Routine", type: "practice", status: "locked" },
+      ]
+    },
+    {
+      id: "m5",
+      title: "The Theorist",
+      description: "Basic Theory & Strumming Development",
+      lessons: [
+        { id: "m5-1", title: "The C Chord", type: "chord", status: "locked" },
+        { id: "m5-2", title: "Guitar Strumming Tips", type: "technique", status: "locked" },
+        { id: "m5-3", title: "Exploring Strumming", type: "rhythm", status: "locked" },
+        { id: "m5-4", title: "Understanding Music Notes", type: "theory", status: "locked" },
+        { id: "m5-5", title: "Your Own Songbook", type: "project", status: "locked" },
+        { id: "m5-6", title: "RIFF Come As You Are", type: "song", status: "locked" },
+        { id: "m5-7", title: "Songs For Module 5", type: "song", status: "locked" },
+        { id: "m5-8", title: "Module 5 Practice", type: "practice", status: "locked" },
+      ]
+    },
+    {
+      id: "m6",
+      title: "The Alternate",
+      description: "6:8 Time, Fast Changes & Alternate Picking",
+      lessons: [
+        { id: "m6-1", title: "Beginner Alternate Picking", type: "technique", status: "locked" },
+        { id: "m6-2", title: "The G Chord... hacked!", type: "chord", status: "locked" },
+        { id: "m6-3", title: "About Time Signatures", type: "theory", status: "locked" },
+        { id: "m6-4", title: "A 6:8 Strumming Pattern", type: "rhythm", status: "locked" },
+        { id: "m6-5", title: "Open String Note Names", type: "theory", status: "locked" },
+        { id: "m6-6", title: "Forcing Chord Changes", type: "exercise", status: "locked" },
+        { id: "m6-7", title: "Songs For Module 6", type: "song", status: "locked" },
+        { id: "m6-8", title: "Module 6 Practice", type: "practice", status: "locked" },
+      ]
+    },
+    {
+      id: "m7",
+      title: "The Camper",
+      description: "Air Changes, Dynamics & Consolidation",
+      lessons: [
+        { id: "m7-1", title: "8 Essential Chord Grips", type: "review", status: "locked" },
+        { id: "m7-2", title: "Best Chord Changes", type: "exercise", status: "locked" },
+        { id: "m7-3", title: "Air Changes", type: "technique", key: true, status: "locked" },
+        { id: "m7-4", title: "Open Strings Changes", type: "technique", status: "locked" },
+        { id: "m7-5", title: "Feel Good Strumming", type: "rhythm", status: "locked" },
+        { id: "m7-6", title: "Dynamic Improvements", type: "expression", status: "locked" },
+        { id: "m7-7", title: "Memorize Easy Songs", type: "song", status: "locked" },
+        { id: "m7-8", title: "Why do Ear Training?", type: "theory", status: "locked" },
+        { id: "m7-9", title: "Why study Music Theory?", type: "theory", status: "locked" },
+        { id: "m7-10", title: "How to PASS Grade 1", type: "milestone", status: "locked" },
+        { id: "m7-11", title: "Module 7 Practice", type: "practice", status: "locked" },
+        { id: "m7-12", title: "Consolidation Practice", type: "tips", status: "locked" },
+        { id: "m7-13", title: "Grade 1 Feedback", type: "tips", status: "locked" },
+      ]
+    },
+    {
+      id: "m8",
+      title: "The Shadow",
+      description: "Nitsuj Grade 1 Practice (Left Handed)",
+      lessons: [
+        { id: "m8-1", title: "Nitsuj Mod 1 - Prac 1", type: "practice", status: "locked" },
+        { id: "m8-2", title: "Nitsuj Mod 1 - Prac 2", type: "practice", status: "locked" },
+        { id: "m8-3", title: "Nitsuj Mod 1 - Prac 3", type: "practice", status: "locked" },
+        { id: "m8-4", title: "Nitsuj Mod 1 - Prac 4", type: "practice", status: "locked" },
+        { id: "m8-5", title: "Nitsuj Mod 2 - Prac 1", type: "practice", status: "locked" },
+        { id: "m8-6", title: "Nitsuj Mod 2 - Prac 3", type: "practice", status: "locked" },
+        { id: "m8-7", title: "Nitsuj Mod 2 - Prac 4", type: "practice", status: "locked" },
+        { id: "m8-8", title: "Nitsuj Mod 2 - Prac 5", type: "practice", status: "locked" },
+        { id: "m8-9", title: "Nitsuj Mod 3 - Prac 1", type: "practice", status: "locked" },
+        { id: "m8-10", title: "Nitsuj Mod 3 - Prac 2", type: "practice", status: "locked" },
+        { id: "m8-11", title: "Nitsuj Mod 3 - Prac 3", type: "practice", status: "locked" },
+        { id: "m8-12", title: "Nitsuj Mod 3 - Prac 4", type: "practice", status: "locked" },
+        { id: "m8-13", title: "Nitsuj Mod 3 - Prac 5", type: "practice", status: "locked" },
+        { id: "m8-14", title: "Nitsuj Mod 4 - Prac 1", type: "practice", status: "locked" },
+        { id: "m8-15", title: "Nitsuj Mod 4 - Prac 2", type: "practice", status: "locked" },
+        { id: "m8-16", title: "Nitsuj Mod 4 - Prac 3", type: "practice", status: "locked" },
+        { id: "m8-17", title: "Nitsuj Mod 4 - Prac 4", type: "practice", status: "locked" },
+        { id: "m8-18", title: "Nitsuj Mod 4 - Prac 5", type: "practice", status: "locked" },
+        { id: "m8-19", title: "Nitsuj Mod 5 - Prac 1", type: "practice", status: "locked" },
+        { id: "m8-20", title: "Nitsuj Mod 5 - Prac 2", type: "practice", status: "locked" },
+        { id: "m8-21", title: "Nitsuj Mod 5 - Prac 3", type: "practice", status: "locked" },
+        { id: "m8-22", title: "Nitsuj Mod 5 - Prac 4", type: "practice", status: "locked" },
+        { id: "m8-23", title: "Nitsuj Mod 5 - Prac 5", type: "practice", status: "locked" },
+        { id: "m8-24", title: "Nitsuj Mod 6 - Prac 1", type: "practice", status: "locked" },
+        { id: "m8-25", title: "Nitsuj Mod 6 - Prac 2", type: "practice", status: "locked" },
+        { id: "m8-26", title: "Nitsuj Mod 6 - Prac 3", type: "practice", status: "locked" },
+        { id: "m8-27", title: "Nitsuj Mod 6 - Prac 4", type: "practice", status: "locked" },
+        { id: "m8-28", title: "Nitsuj Mod 6 - Prac 5", type: "practice", status: "locked" },
+        { id: "m8-29", title: "Nitsuj Mod 7 - Prac 1", type: "practice", status: "locked" },
+        { id: "m8-30", title: "Nitsuj Mod 7 - Prac 2", type: "practice", status: "locked" },
+        { id: "m8-31", title: "Nitsuj Mod 7 - Prac 3", type: "practice", status: "locked" },
+        { id: "m8-32", title: "Nitsuj Mod 7 - Prac 4", type: "practice", status: "locked" },
+        { id: "m8-33", title: "Nitsuj Mod 7 - Prac 5", type: "practice", status: "locked" },
+        { id: "m8-34", title: "Nitsuj Mod 7 - Prac 6", type: "practice", status: "locked" },
+        { id: "m8-35", title: "Nitsuj Mod 7 - Prac 7", type: "practice", status: "locked" },
+        { id: "m8-36", title: "Nitsuj Mod 7 - Prac 8", type: "practice", status: "locked" },
+        { id: "m8-37", title: "Nitsuj Mod 7 - Prac 10", type: "practice", status: "locked" },
+      ]
+    }
+  ]
+};
+// --- COLORS & UTILS ---
+const getTypeColor = (type, isBright = false) => {
+    let color;
+    switch(type) {
+        case 'chord': color = '#00f7ff'; break;
+        case 'song': color = '#ff3366'; break;
+        case 'rhythm': color = '#33ff57'; break;
+        case 'technique': color = '#b300ff'; break;
+        case 'theory': color = '#ffcc00'; break;
+        case 'milestone': color = '#ffffff'; break;
+        case 'tool': color = '#ff9900'; break;
+        case 'tips': color = '#0099ff'; break;
+        case 'practice': color = '#777777'; break;
+        case 'hub': color = '#ffffff'; break;
+        default: color = '#ffffff';
+    }
+    return color;
+};
+
+const generateConstellationLayout = (centerX, centerY, lessons, radiusScale = 1) => {
+  const nodes = [];
+  const lines = [];
+  const nodeCount = lessons.length;
+  
+  nodes.push({
+    x: centerX,
+    y: centerY,
+    size: 24,
+    isHub: true,
+    data: { title: "MODULE HUB", type: "hub" } 
+  });
+  lessons.forEach((lesson, index) => {
+    let angle, distance;
+
+    if (nodeCount > 15) {
+        const armCount = 3;
+        const armIndex = index % armCount;
+        const progress = Math.floor(index / armCount) / (nodeCount / armCount);
+        
+        angle = (armIndex * (Math.PI * 2 / armCount)) + (progress * 2);
+        distance = (80 + (progress * 150)) * radiusScale;
+
+    } else {
+        angle = (index / lessons.length) * Math.PI * 2 + (Math.random() * 0.5);
+        distance = (70 + Math.random() * 60) * radiusScale;
+    }
+    
+    const isSong = lesson.type === 'song';
+    const finalDist = isSong ? distance * 1.3 : distance;
+
+    const nodeX = centerX + Math.cos(angle) * finalDist;
+    const nodeY = centerY + Math.sin(angle) * finalDist;
+
+    nodes.push({
+      x: nodeX,
+      y: nodeY,
+      size: isSong ? 8 : (lesson.key ? 16 : (lesson.type === 'practice' ? 5 : 9)),
+      data: lesson,
+      isSong: isSong,
+      isKey: lesson.key || false
+    });
+
+    if (index === 0) {
+        lines.push({ from: 0, to: index + 1 });
+    } else {
+        const connectToHub = Math.random() > 0.6;
+        lines.push({ from: connectToHub ? 0 : index, to: index + 1 });
+    }
+  });
+
+  return { nodes, lines };
+};
+const SkyMap = () => {
+  const canvasRef = useRef(null);
+  const containerRef = useRef(null);
+  const [selectedNode, setSelectedNode] = useState(null);
+  const [hoveredNode, setHoveredNode] = useState(null);
+  const [camera, setCamera] = useState({ x: 0, y: 0, zoom: 0.6 });
+  const [isDragging, setIsDragging] = useState(false);
+  const [dragStart, setDragStart] = useState({ x: 0, y: 0 });
+
+  // --- GENERATE WORLD MAP ---
+  const worldData = useMemo(() => {
+    let allNodes = [];
+    let allLines = [];
+    
+    const modulePositions = [
+      { x: 0, y: 0 },
+      { x: 0, y: -450 },
+      { x: 400, y: -300 },
+      { x: 550, y: 100 },
+      { x: 300, y: 500 },
+      { x: -150, y: 600 },
+      { x: -600, y: 400 },
+      { x: -750, y: -100 },
+      { x: -1100, y: -600 }
+    ];
+
+    rawData.modules.forEach((mod, idx) => {
+      const unlockedLessons = mod.lessons.map(l => ({ ...l, status: 'completed' }));
+
+      const pos = modulePositions[idx] || { x: 0, y: 0 };
+      const { nodes, lines } = generateConstellationLayout(pos.x, pos.y, unlockedLessons);
+      nodes[0].data = { ...mod, type: 'hub', status: 'completed' };
+
+      const globalLines = lines.map(l => ({
+        from: l.from + allNodes.length,
+        to: l.to + allNodes.length,
+        status: nodes[l.to]?.data?.status || 'completed'
+      }));
+
+      if (idx > 0) {
+        const prevHubIndex = allNodes.findIndex(n => n.data.id === rawData.modules[idx-1].id);
+        if (prevHubIndex !== -1) {
+            globalLines.push({ 
+                from: prevHubIndex, 
+                to: allNodes.length, 
+                isPath: true,
+                status: 'completed'
+            });
+        }
+      }
+
+      allNodes = [...allNodes, ...nodes];
+      allLines = [...allLines, ...globalLines];
+    });
+
+    const stars = [];
+    for(let i=0; i<600; i++) {
+        stars.push({
+            x: (Math.random() - 0.5) * 5000,
+            y: (Math.random() - 0.5) * 5000,
+            size: Math.random() * 2,
+            alpha: Math.random() * 0.6
+        });
+    }
+
+    return { allNodes, allLines, stars };
+  }, []);
+  // --- DRAWING LOOP ---
+  useEffect(() => {
+    const canvas = canvasRef.current;
+    const ctx = canvas.getContext('2d');
+    let animationFrameId;
+    let time = 0;
+
+    const render = () => {
+      time += 0.01;
+      if (!canvas || !containerRef.current) return;
+      
+      canvas.width = containerRef.current.clientWidth;
+      canvas.height = containerRef.current.clientHeight;
+      const cw = canvas.width;
+      const ch = canvas.height;
+
+      const gradient = ctx.createRadialGradient(cw/2, ch/2, 100, cw/2, ch/2, 1200);
+      gradient.addColorStop(0, "#0f1219");
+      gradient.addColorStop(1, "#020204");
+      ctx.fillStyle = gradient;
+      ctx.fillRect(0, 0, cw, ch);
+
+      ctx.save();
+      ctx.translate(cw/2 + camera.x, ch/2 + camera.y);
+      ctx.scale(camera.zoom, camera.zoom);
+
+      ctx.fillStyle = "white";
+      worldData.stars.forEach(star => {
+          ctx.globalAlpha = star.alpha + Math.sin(time + star.x) * 0.2;
+          ctx.beginPath();
+          ctx.arc(star.x, star.y, star.size, 0, Math.PI*2);
+          ctx.fill();
+      });
+      // Draw Lines
+      worldData.allLines.forEach(line => {
+        const start = worldData.allNodes[line.from];
+        const end = worldData.allNodes[line.to];
+        
+        ctx.beginPath();
+        ctx.moveTo(start.x, start.y);
+        ctx.lineTo(end.x, end.y);
+        
+        const isPathActive = line.status === 'completed' || line.status === 'active';
+        
+        if (line.isPath) {
+            ctx.strokeStyle = isPathActive ? "rgba(100, 200, 255, 0.4)" : "rgba(255, 255, 255, 0.05)";
+            ctx.lineWidth = isPathActive ? 4 : 1;
+            ctx.setLineDash([15, 15]);
+            ctx.lineDashOffset = isPathActive ? -time * 20 : 0;
+        } else {
+            ctx.strokeStyle = isPathActive ? "rgba(255, 255, 255, 0.3)" : "rgba(255, 255, 255, 0.04)";
+            ctx.lineWidth = 1;
+            ctx.setLineDash([]);
+        }
+        ctx.stroke();
+      });
+      ctx.setLineDash([]);
+      // Draw Nodes
+      worldData.allNodes.forEach(node => {
+        const isHovered = hoveredNode === node;
+        const isSelected = selectedNode === node;
+        const isCompleted = node.data.status === 'completed';
+        const isActive = node.data.status === 'active';
+        const isLocked = node.data.status === 'locked';
+        
+        const typeColor = getTypeColor(node.data.type);
+        const displayColor = (isLocked && !isHovered) ? "#4a4a5e" : typeColor;
+
+        if (isHovered || isSelected || isCompleted || isActive) {
+            const baseGlowSize = node.size * (isHovered ? 4 : 2.5);
+            const pulse = Math.sin(time * 3) * 5;
+            const glowSize = baseGlowSize + (isActive ? pulse : 0);
+            
+            const alpha = isHovered ? 0.8 : (isCompleted ? 0.3 : 0.1);
+
+            const grd = ctx.createRadialGradient(node.x, node.y, node.size/2, node.x, node.y, glowSize);
+            grd.addColorStop(0, displayColor);
+            grd.addColorStop(1, "rgba(0,0,0,0)");
+            
+            ctx.globalAlpha = alpha;
+            ctx.fillStyle = grd;
+            ctx.beginPath();
+            ctx.arc(node.x, node.y, glowSize, 0, Math.PI*2);
+            ctx.fill();
+        }
+
+        ctx.globalAlpha = 1;
+        ctx.fillStyle = (isLocked && !isHovered) ? "#222" : "#fff"; 
+        
+        if (!isLocked || isHovered) {
+             ctx.shadowBlur = 10;
+             ctx.shadowColor = displayColor;
+        } else {
+             ctx.shadowBlur = 0;
+        }
+        ctx.beginPath();
+        if (node.isHub) {
+            drawStar(ctx, node.x, node.y, 4, node.size, node.size * 0.4);
+        } else {
+            drawStar(ctx, node.x, node.y, 4, node.size, node.size * 0.2);
+        }
+        ctx.fill();
+        ctx.shadowBlur = 0;
+
+        // HOVER LABEL
+        if (isHovered) {
+            ctx.save();
+            ctx.font = "bold 14px Futura, sans-serif";
+            const titleWidth = ctx.measureText(node.data.title).width;
+            const padding = 12;
+            const boxW = Math.max(titleWidth + padding * 2, 120);
+            const boxH = 45;
+            const boxX = node.x - boxW/2;
+            const boxY = node.y - node.size - boxH - 10;
+
+            ctx.fillStyle = "rgba(10, 10, 20, 0.9)";
+            ctx.strokeStyle = displayColor;
+            ctx.lineWidth = 1;
+            ctx.beginPath();
+            ctx.roundRect(boxX, boxY, boxW, boxH, 6);
+            ctx.fill();
+            ctx.stroke();
+
+            ctx.fillStyle = "#fff";
+            ctx.textAlign = "center";
+            ctx.fillText(node.data.title, node.x, boxY + 20);
+            ctx.font = "10px sans-serif";
+            ctx.fillStyle = displayColor;
+            ctx.fillText(node.data.type.toUpperCase() + (isLocked ? " [LOCKED]" : ""), node.x, boxY + 36);
+
+            ctx.beginPath();
+            ctx.moveTo(node.x, boxY + boxH);
+            ctx.lineTo(node.x, node.y - node.size - 2);
+            ctx.strokeStyle = displayColor;
+            ctx.stroke();
+
+            ctx.restore();
+        }
+      });
+
+      ctx.restore();
+      animationFrameId = requestAnimationFrame(render);
+    };
+    render();
+
+    return () => cancelAnimationFrame(animationFrameId);
+  }, [camera, hoveredNode, selectedNode, worldData]);
+  // --- UTILS ---
+  const drawStar = (ctx, cx, cy, spikes, outerRadius, innerRadius) => {
+      let rot = Math.PI / 2 * 3;
+      let x = cx;
+      let y = cy;
+      let step = Math.PI / spikes;
+
+      ctx.beginPath();
+      ctx.moveTo(cx, cy - outerRadius);
+      for (let i = 0; i < spikes; i++) {
+          x = cx + Math.cos(rot) * outerRadius;
+          y = cy + Math.sin(rot) * outerRadius;
+          ctx.lineTo(x, y);
+          rot += step;
+
+          x = cx + Math.cos(rot) * innerRadius;
+          y = cy + Math.sin(rot) * innerRadius;
+          ctx.lineTo(x, y);
+          rot += step;
+      }
+      ctx.lineTo(cx, cy - outerRadius);
+      ctx.closePath();
+  }
+
+  // --- EVENTS ---
+  const handleWheel = (e) => {
+    e.preventDefault();
+    const zoomSpeed = 0.001;
+    const newZoom = Math.min(Math.max(camera.zoom - e.deltaY * zoomSpeed, 0.1), 3);
+    setCamera(prev => ({ ...prev, zoom: newZoom }));
+  };
+  const handleMouseDown = (e) => {
+    setIsDragging(true);
+    setDragStart({ x: e.clientX - camera.x, y: e.clientY - camera.y });
+  };
+
+  const handleMouseMove = (e) => {
+    if (isDragging) {
+      setCamera(prev => ({
+        ...prev,
+        x: e.clientX - dragStart.x,
+        y: e.clientY - dragStart.y
+      }));
+    }
+    const rect = canvasRef.current.getBoundingClientRect();
+    const mouseX = (e.clientX - rect.left - rect.width/2 - camera.x) / camera.zoom;
+    const mouseY = (e.clientY - rect.top - rect.height/2 - camera.y) / camera.zoom;
+
+    const hit = worldData.allNodes.find(node => {
+      const dist = Math.sqrt(Math.pow(node.x - mouseX, 2) + Math.pow(node.y - mouseY, 2));
+      return dist < node.size + 15;
+    });
+
+    setHoveredNode(hit || null);
+    canvasRef.current.style.cursor = hit ? 'pointer' : (isDragging ? 'grabbing' : 'grab');
+  };
+
+  const handleMouseUp = () => {
+    setIsDragging(false);
+    if (hoveredNode) setSelectedNode(hoveredNode);
+  };
+  return (
+    <div className="relative w-full h-screen overflow-hidden bg-black text-white font-sans selection:bg-blue-500/30">
+      {/* CANVAS LAYER */}
+      <div ref={containerRef} className="absolute inset-0">
+        <canvas
+          ref={canvasRef}
+          onMouseDown={handleMouseDown}
+          onMouseMove={handleMouseMove}
+          onMouseUp={handleMouseUp}
+          onMouseLeave={() => setIsDragging(false)}
+          onWheel={handleWheel}
+          className="block"
+        />
+      </div>
+
+      {/* UI OVERLAY - TOP BAR */}
+      <div className="absolute top-0 left-0 w-full p-6 flex justify-between items-start pointer-events-none">
+        <div className="flex flex-col gap-1 drop-shadow-lg">
+          <h1 className="text-4xl font-thin tracking-widest text-slate-100 uppercase" style={{fontFamily: 'Futura, sans-serif', textShadow: '0 0 20px rgba(255,255,255,0.5)'}}>
+            Skyrim<span className="text-blue-400">Guitar</span>
+          </h1>
+          <div className="flex items-center gap-2 text-blue-300">
+            <span className="text-sm tracking-widest uppercase opacity-90">Grade 1 • Beginner</span>
+          </div>
+        </div>
+
+        {/* LEGEND */}
+        <div className="hidden lg:flex flex-col gap-2 pointer-events-auto bg-black/60 backdrop-blur-md border border-white/10 p-3 rounded-lg text-xs tracking-wider">
+           <div className="flex items-center gap-2"><div className="w-2 h-2 rounded-full bg-[#00f7ff] shadow-[0_0_8px_#00f7ff]"></div> Chords</div>
+           <div className="flex items-center gap-2"><div className="w-2 h-2 rounded-full bg-[#ff3366] shadow-[0_0_8px_#ff3366]"></div> Songs</div>
+           <div className="flex items-center gap-2"><div className="w-2 h-2 rounded-full bg-[#33ff57] shadow-[0_0_8px_#33ff57]"></div> Rhythm</div>
+           <div className="flex items-center gap-2"><div className="w-2 h-2 rounded-full bg-[#b300ff] shadow-[0_0_8px_#b300ff]"></div> Technique</div>
+           <div className="flex items-center gap-2"><div className="w-2 h-2 rounded-full bg-[#777777] border border-white/30"></div> Practice</div>
+        </div>
+      </div>
+      {/* UI OVERLAY - DETAILS PANEL */}
+      {selectedNode && (
+        <div className="absolute bottom-8 right-8 w-96 max-h-[70vh] overflow-y-auto bg-slate-900/90 backdrop-blur-xl border border-white/20 p-6 transform transition-all animate-in fade-in slide-in-from-bottom-10 shadow-2xl rounded-sm">
+          <div className="flex justify-between items-start mb-4">
+             <div className="flex items-center gap-2 uppercase tracking-widest text-xs font-semibold" style={{color: getTypeColor(selectedNode.data.type)}}>
+                {selectedNode.data.type === 'hub' ? 'Constellation' : selectedNode.data.type}
+             </div>
+             <button onClick={() => setSelectedNode(null)} className="text-slate-500 hover:text-white transition-colors">&#x2715;</button>
+          </div>
+
+          <h2 className="text-3xl mb-2 font-light text-white tracking-wide" style={{textShadow: `0 0 30px ${getTypeColor(selectedNode.data.type)}`}}>
+            {selectedNode.data.title}
+          </h2>
+          
+          <div className="w-full h-[1px] bg-gradient-to-r from-transparent via-white/30 to-transparent my-4"></div>
+
+          {selectedNode.data.type === 'hub' ? (
+             <div className="space-y-4">
+                 <p className="text-slate-300 leading-relaxed font-light italic">
+                    {selectedNode.data.description}
+                 </p>
+                 <div className="grid grid-cols-2 gap-4 mt-4">
+                     {selectedNode.data.lessons.slice(0, 10).map(l => (
+                         <div key={l.id} className={`text-xs flex items-center gap-2 ${l.status === 'completed' ? 'text-white' : 'text-slate-600'}`}>
+                            <div className={`w-1 h-1 rounded-full ${l.status === 'completed' ? 'bg-blue-400' : 'bg-slate-700'}`}></div>
+                            {l.title}
+                         </div>
+                     ))}
+                     {selectedNode.data.lessons.length > 10 && (
+                         <div className="text-xs text-slate-500 italic col-span-2">
+                             ...and {selectedNode.data.lessons.length - 10} more skills.
+                         </div>
+                     )}
+                 </div>
+             </div>
+          ) : (
+            <div className="space-y-4">
+                <p className="text-slate-300 text-sm leading-relaxed">
+                   {selectedNode.data.status === 'locked' 
+                     ? "This knowledge is currently beyond your reach. Complete previous constellations to unlock." 
+                     : "Master this skill to progress further in your journey."}
+                </p>
+                <button 
+                  disabled={selectedNode.data.status === 'locked'}
+                  className={`w-full mt-4 py-3 uppercase tracking-widest text-xs font-bold transition-all border ${selectedNode.data.status === 'locked' ? 'border-slate-700 text-slate-600 cursor-not-allowed' : 'border-white text-black bg-white hover:bg-blue-50 hover:scale-[1.02]'}`}
+                >
+                    {selectedNode.data.status === 'completed' ? 'Review Lesson' : (selectedNode.data.status === 'locked' ? 'Locked' : 'Start Lesson')}
+                </button>
+            </div>
+          )}
+        </div>
+      )}
+
+      {/* CONTROLS HINT */}
+      <div className="absolute bottom-6 left-6 text-slate-500 text-[10px] tracking-[0.2em] uppercase pointer-events-none">
+        Drag to Look • Scroll to Zoom • Hover to Reveal
+      </div>
+    </div>
+  );
+};
+
+ReactDOM.createRoot(document.getElementById('root')).render(<SkyMap />);
+  </script>
+</body>
+</html>

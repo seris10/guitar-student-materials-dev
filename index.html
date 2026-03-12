@@ -1,0 +1,464 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Guitar Club</title>
+  <link rel="stylesheet" href="styles/base.css">
+  <link rel="stylesheet" href="styles/layout.css">
+  <link rel="stylesheet" href="styles/components.css">
+  <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/raphael/2.3.0/raphael.min.js"></script>
+  <script src="https://jtab.tardate.com/javascripts/jtab.js"></script>
+  <script src="scripts/api.js"></script>
+  <script src="scripts/auth.js"></script>
+  <style>
+    .dashboard-stats {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 1rem;
+      margin-bottom: 2rem;
+    }
+    .stat-card {
+      background: var(--bg-secondary, #161b22);
+      border: 1px solid var(--border, #30363d);
+      border-radius: 12px;
+      padding: 1.25rem;
+      text-align: center;
+      display: flex;
+      flex-direction: column;
+      gap: 0.25rem;
+    }
+    .stat-value {
+      font-size: 2rem;
+      font-weight: 700;
+      color: var(--accent, #58a6ff);
+    }
+    .stat-label {
+      font-size: 0.8rem;
+      color: var(--text-secondary, #8b949e);
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+    }
+    .current-mission {
+      margin-bottom: 2rem;
+    }
+    .current-mission h3 {
+      margin-bottom: 0.75rem;
+      color: var(--text-primary, #e6edf3);
+    }
+    .mission-card {
+      background: var(--bg-secondary, #161b22);
+      border: 1px solid var(--border, #30363d);
+      border-radius: 12px;
+      padding: 1.25rem;
+      display: flex;
+      align-items: center;
+      gap: 1rem;
+    }
+    .mission-icon {
+      font-size: 2rem;
+    }
+    .mission-info {
+      flex: 1;
+    }
+    .mission-info strong {
+      color: var(--text-primary, #e6edf3);
+      display: block;
+      margin-bottom: 0.25rem;
+    }
+    .mission-info p {
+      color: var(--text-secondary, #8b949e);
+      font-size: 0.9rem;
+      margin: 0;
+    }
+    .mission-btn {
+      background: var(--accent, #58a6ff);
+      color: var(--bg-primary, #0d1117);
+      padding: 0.5rem 1.5rem;
+      border-radius: 8px;
+      text-decoration: none;
+      font-weight: 600;
+      transition: opacity 0.2s;
+    }
+    .mission-btn:hover {
+      opacity: 0.85;
+    }
+    @media (max-width: 640px) {
+      .dashboard-stats {
+        grid-template-columns: repeat(2, 1fr);
+      }
+    }
+  </style>
+</head>
+<body class="has-app-sidebar">
+
+<!-- Mobile Sidebar Toggle -->
+<button class="sidebar-toggle" id="sidebarToggle" aria-label="Toggle menu">
+  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+    <path d="M3 12h18M3 6h18M3 18h18"/>
+  </svg>
+</button>
+
+<!-- App Sidebar (from guitar-quest) -->
+<nav class="app-sidebar" id="appSidebar">
+  <!-- User Profile -->
+  <div class="sidebar-profile">
+    <div class="profile-icon">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+        <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2z"/>
+        <path d="M8 14s1.5 2 4 2 4-2 4-2"/>
+        <circle cx="9" cy="9" r="1" fill="currentColor"/>
+        <circle cx="15" cy="9" r="1" fill="currentColor"/>
+      </svg>
+    </div>
+    <div class="profile-info">
+      <div class="profile-name">Rocker123</div>
+      <div class="profile-rank">Bedroom Jammer</div>
+    </div>
+  </div>
+
+  <!-- Navigation -->
+  <div class="sidebar-nav">
+    <a href="index.html" class="nav-item active" data-page="dashboard">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+        <path d="M22 12h-4l-3 9L9 3l-3 9H2"/>
+      </svg>
+      Dashboard
+    </a>
+    <a href="star-map.html" class="nav-item" data-page="clusters">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+        <circle cx="12" cy="12" r="3"/>
+        <circle cx="5" cy="8" r="2"/>
+        <circle cx="19" cy="8" r="2"/>
+        <circle cx="5" cy="16" r="2"/>
+        <circle cx="19" cy="16" r="2"/>
+      </svg>
+      Clusters
+    </a>
+    <a href="constellation-react.html" class="nav-item" data-page="star-map">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+        <circle cx="12" cy="12" r="10"/>
+        <path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/>
+      </svg>
+      Star Map
+    </a>
+    <a href="constellation-branch1.html" class="nav-item" data-page="foundations">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+        <path d="M12 2L2 7l10 5 10-5-10-5z"/>
+        <path d="M2 17l10 5 10-5"/>
+        <path d="M2 12l10 5 10-5"/>
+      </svg>
+      Foundations
+    </a>
+    <a href="constellation-3d.html" class="nav-item" data-page="3d-map">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+        <path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/>
+        <polyline points="3.27 6.96 12 12.01 20.73 6.96"/>
+        <line x1="12" y1="22.08" x2="12" y2="12"/>
+      </svg>
+      3D Map
+    </a>
+    <a href="chords.html" class="nav-item" data-page="chords">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+        <rect x="3" y="3" width="7" height="7" rx="1"/>
+        <rect x="14" y="3" width="7" height="7" rx="1"/>
+        <rect x="3" y="14" width="7" height="7" rx="1"/>
+        <rect x="14" y="14" width="7" height="7" rx="1"/>
+      </svg>
+      Chord Library
+    </a>
+    <a href="tuner.html" class="nav-item" data-page="tuner">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+        <path d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z"/>
+        <path d="M19 10v2a7 7 0 0 1-14 0v-2"/>
+        <line x1="12" y1="19" x2="12" y2="23"/>
+        <line x1="8" y1="23" x2="16" y2="23"/>
+      </svg>
+      Tuner
+    </a>
+    <a href="practice-log.html" class="nav-item" data-page="practice">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+        <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/>
+        <polyline points="22 4 12 14.01 9 11.01"/>
+      </svg>
+      Practice Log
+    </a>
+    <a href="song-bank.html" class="nav-item" data-page="songs">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+        <path d="M9 18V5l12-2v13"/>
+        <circle cx="6" cy="18" r="3"/>
+        <circle cx="18" cy="16" r="3"/>
+      </svg>
+      Song Bank
+    </a>
+    <a href="settings.html" class="nav-item" data-page="settings">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+        <circle cx="12" cy="12" r="3"/>
+        <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"/>
+      </svg>
+      Settings
+    </a>
+  </div>
+
+  <!-- Footer -->
+  <div class="sidebar-footer">
+    <button class="btn-design-mode">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+        <circle cx="12" cy="12" r="5"/>
+        <line x1="12" y1="1" x2="12" y2="3"/>
+        <line x1="12" y1="21" x2="12" y2="23"/>
+        <line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/>
+        <line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/>
+        <line x1="1" y1="12" x2="3" y2="12"/>
+        <line x1="21" y1="12" x2="23" y2="12"/>
+        <line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/>
+        <line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/>
+      </svg>
+      Design Mode
+    </button>
+    <button class="btn-logout">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+        <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/>
+        <polyline points="16 17 21 12 16 7"/>
+        <line x1="21" y1="12" x2="9" y2="12"/>
+      </svg>
+      Logout
+    </button>
+  </div>
+</nav>
+
+<div class="page hub">
+
+<main class="main-content">
+
+<header>
+  <h1>Guitar Club</h1>
+  <p class="tagline">Practice Hub</p>
+</header>
+
+<section class="dashboard-stats" id="dashboardStats">
+  <div class="stat-card">
+    <span class="stat-value" id="statStreak">0</span>
+    <span class="stat-label">Day Streak</span>
+  </div>
+  <div class="stat-card">
+    <span class="stat-value" id="statWeekMinutes">0</span>
+    <span class="stat-label">Minutes This Week</span>
+  </div>
+  <div class="stat-card">
+    <span class="stat-value" id="statSkills">0</span>
+    <span class="stat-label">Skills Mastered</span>
+  </div>
+  <div class="stat-card">
+    <span class="stat-value" id="statSessions">0</span>
+    <span class="stat-label">Total Sessions</span>
+  </div>
+</section>
+
+<section class="current-mission" id="currentMission">
+  <h3>Current Mission</h3>
+  <div class="mission-card">
+    <span class="mission-icon">&#11088;</span>
+    <div class="mission-info">
+      <strong id="missionTitle">Learn the Parts of the Guitar</strong>
+      <p id="missionDesc">Start with the basics — identify the key parts of your instrument.</p>
+    </div>
+    <a href="skills/parts-of-guitar.html" class="mission-btn" id="missionLink">Go</a>
+  </div>
+</section>
+
+<section>
+  <h2>Songs</h2>
+  <div class="song-grid">
+
+    <article class="song-card" data-href="songs/remember-me/">
+      <div class="video-preview" data-video-id="KP_XkN2v7OM">
+        <img src="https://img.youtube.com/vi/KP_XkN2v7OM/mqdefault.jpg" alt="Remember Me thumbnail" class="preview-thumb">
+        <button class="preview-play" aria-label="Play video">
+          <svg viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7z"/></svg>
+        </button>
+      </div>
+      <div class="song-info">
+        <h3 class="song-title">Remember Me (Lullaby)</h3>
+        <div class="song-artist">from Coco</div>
+        <div class="song-chips">
+          <span class="chip">Tab</span>
+          <span class="chip">No capo</span>
+          <span class="chip">Fingerpicking</span>
+        </div>
+        <div class="song-actions">
+          <a href="songs/remember-me/" class="btn-open">Open</a>
+        </div>
+      </div>
+    </article>
+
+    <article class="song-card" data-href="songs/hey-lover/">
+      <div class="video-preview" data-video-id="KbHaIbDKQMc">
+        <img src="https://img.youtube.com/vi/KbHaIbDKQMc/mqdefault.jpg" alt="Hey Lover thumbnail" class="preview-thumb">
+        <button class="preview-play" aria-label="Play video">
+          <svg viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7z"/></svg>
+        </button>
+      </div>
+      <div class="song-info">
+        <h3 class="song-title">Hey Lover</h3>
+        <div class="song-artist">The Daughters of Eve</div>
+        <div class="song-chips">
+          <span class="chip">Chords</span>
+          <span class="chip">Capo 1</span>
+          <span class="chip">G D Bm A</span>
+        </div>
+        <div class="song-actions">
+          <a href="songs/hey-lover/" class="btn-open">Open</a>
+        </div>
+      </div>
+    </article>
+
+    <article class="song-card" data-href="songs/seven-nation-army/">
+      <div class="video-preview" data-video-id="0J2QdDbelmY">
+        <img src="https://img.youtube.com/vi/0J2QdDbelmY/mqdefault.jpg" alt="Seven Nation Army thumbnail" class="preview-thumb">
+        <button class="preview-play" aria-label="Play video">
+          <svg viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7z"/></svg>
+        </button>
+      </div>
+      <div class="song-info">
+        <h3 class="song-title">Seven Nation Army</h3>
+        <div class="song-artist">The White Stripes</div>
+        <div class="song-chips">
+          <span class="chip">Tab</span>
+          <span class="chip">No capo</span>
+          <span class="chip">A string riff</span>
+        </div>
+        <div class="song-actions">
+          <a href="songs/seven-nation-army/" class="btn-open">Open</a>
+        </div>
+      </div>
+    </article>
+
+  </div>
+</section>
+
+<section>
+  <h2>Chords</h2>
+  <div class="panel">
+    <div class="chord-row">
+      <div class="chord-item">
+        <div class="chord-name">C</div>
+        <div class="jtab chordonly">C</div>
+      </div>
+      <div class="chord-item">
+        <div class="chord-name">G</div>
+        <div class="jtab chordonly">G</div>
+      </div>
+      <div class="chord-item">
+        <div class="chord-name">A</div>
+        <div class="jtab chordonly">A</div>
+      </div>
+      <div class="chord-item">
+        <div class="chord-name">Em</div>
+        <div class="jtab chordonly">Em</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section>
+  <h2>Tips</h2>
+  <div class="tips-grid">
+    <div class="tip-card"><strong>Make more mistakes.</strong> Don't be afraid to mess up — that's how you learn.</div>
+    <div class="tip-card"><strong>Play through mistakes.</strong> Don't restart every time. Keep going, finish the phrase.</div>
+    <div class="tip-card"><strong>Use a metronome or song.</strong> Even if it's hard to keep up, it builds your timing.</div>
+    <div class="tip-card"><strong>Slow is smooth, smooth is fast.</strong> Get it right slowly before speeding up.</div>
+    <div class="tip-card"><strong>Let each note ring.</strong> Pick each string and make sure it sounds clean.</div>
+  </div>
+</section>
+
+</main>
+
+<!-- Video Modal -->
+<div class="video-modal" id="videoModal">
+  <div class="modal-backdrop"></div>
+  <div class="modal-content">
+    <button class="modal-close" aria-label="Close">&times;</button>
+    <div class="modal-video"></div>
+    <a href="#" class="modal-open-link">Open song page</a>
+  </div>
+</div>
+
+</div>
+<script src="scripts/main.js"></script>
+<script>
+// Mobile sidebar toggle
+const sidebarToggle = document.getElementById('sidebarToggle');
+const appSidebar = document.getElementById('appSidebar');
+
+if (sidebarToggle && appSidebar) {
+  sidebarToggle.addEventListener('click', () => {
+    appSidebar.classList.toggle('open');
+    document.body.classList.toggle('sidebar-open');
+  });
+
+  // Close sidebar when clicking outside
+  document.addEventListener('click', (e) => {
+    if (appSidebar.classList.contains('open') &&
+        !appSidebar.contains(e.target) &&
+        !sidebarToggle.contains(e.target)) {
+      appSidebar.classList.remove('open');
+      document.body.classList.remove('sidebar-open');
+    }
+  });
+}
+
+// Nav item click handling (placeholder - will be enhanced later)
+document.querySelectorAll('.nav-item').forEach(item => {
+  item.addEventListener('click', function() {
+    document.querySelectorAll('.nav-item').forEach(i => i.classList.remove('active'));
+    this.classList.add('active');
+  });
+});
+</script>
+
+<script>
+document.addEventListener('DOMContentLoaded', async () => {
+  try {
+    // Try API first
+    if (window.GuitarAPI) {
+      const stats = await GuitarAPI.getPracticeStats();
+      if (stats) {
+        document.getElementById('statWeekMinutes').textContent = stats.weekMinutes || 0;
+        document.getElementById('statSessions').textContent = stats.totalSessions || 0;
+      }
+
+      const progress = await GuitarAPI.getProgress();
+      if (progress) {
+        const mastered = progress.filter(p => p.status === 'completed').length;
+        document.getElementById('statSkills').textContent = mastered;
+      }
+    }
+  } catch (e) {
+    console.warn('Dashboard stats: API unavailable, using local data');
+  }
+
+  // Streak from localStorage fallback
+  try {
+    const history = JSON.parse(localStorage.getItem('practiceHistory') || '[]');
+    let streak = 0;
+    const today = new Date();
+    today.setHours(0,0,0,0);
+    for (let i = 0; i < 365; i++) {
+      const checkDate = new Date(today);
+      checkDate.setDate(checkDate.getDate() - i);
+      const dateStr = checkDate.toISOString().split('T')[0];
+      const practiced = history.some(s => s.date && s.date.startsWith(dateStr));
+      if (practiced || (i === 0)) { // today might not have practice yet
+        if (practiced) streak++;
+        else if (i === 0) continue; // skip today if no practice yet
+      } else break;
+    }
+    const streakEl = document.getElementById('statStreak');
+    if (streakEl && streak > 0) streakEl.textContent = streak;
+  } catch (e) {}
+});
+</script>
+</body>
+</html>

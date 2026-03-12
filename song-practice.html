@@ -1,0 +1,1374 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Song Practice - Guitar Club</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="styles/base.css">
+  <link rel="stylesheet" href="styles/components.css">
+  <style>
+    /* ============================================
+       SONG PRACTICE PAGE: Two-column layout
+       ============================================ */
+
+    body {
+      background: var(--bg-primary);
+    }
+
+    .practice-wrapper {
+      display: grid;
+      grid-template-columns: 280px 1fr;
+      gap: 32px;
+      max-width: 1400px;
+      margin: 0 auto;
+      padding: 40px 24px;
+      min-height: 100vh;
+    }
+
+    /* ============================================
+       LEFT SIDEBAR: Sticky, practice panels
+       ============================================ */
+
+    .practice-sidebar {
+      position: sticky;
+      top: 24px;
+      height: fit-content;
+      display: flex;
+      flex-direction: column;
+      gap: 20px;
+    }
+
+    .sidebar-panel {
+      background: var(--bg-secondary);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 18px;
+    }
+
+    .panel-title {
+      font-size: 13px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      color: var(--text-muted);
+      margin-bottom: 16px;
+    }
+
+    /* Song Stats Panel */
+    .stat-item {
+      display: flex;
+      justify-content: space-between;
+      align-items: baseline;
+      margin-bottom: 14px;
+      padding-bottom: 14px;
+      border-bottom: 1px solid var(--border);
+    }
+
+    .stat-item:last-child {
+      border-bottom: none;
+      margin-bottom: 0;
+      padding-bottom: 0;
+    }
+
+    .stat-label {
+      font-size: 13px;
+      color: var(--text-secondary);
+    }
+
+    .stat-value {
+      font-size: 16px;
+      font-weight: 700;
+      color: var(--text-primary);
+      font-family: var(--font-mono);
+    }
+
+    .stat-default {
+      color: var(--text-muted);
+      font-size: 12px;
+      font-family: var(--font-sans);
+      font-weight: 400;
+    }
+
+    /* Skills Panel */
+    .skill-list {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+
+    .skill-item {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 10px;
+      background: var(--bg-tertiary);
+      border-radius: 8px;
+      border: 1px solid var(--border);
+      transition: all 0.2s;
+    }
+
+    .skill-item:hover {
+      background: rgba(88, 166, 255, 0.08);
+      border-color: var(--accent);
+    }
+
+    .skill-checkbox {
+      width: 18px;
+      height: 18px;
+      cursor: pointer;
+      accent-color: var(--accent-green);
+    }
+
+    .skill-name {
+      flex: 1;
+      font-size: 13px;
+      color: var(--text-primary);
+      font-weight: 500;
+    }
+
+    .skill-link {
+      display: inline-block;
+      width: 20px;
+      height: 20px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      border-radius: 4px;
+      background: var(--bg-secondary);
+      color: var(--accent);
+      font-size: 12px;
+      text-decoration: none;
+      transition: all 0.2s;
+    }
+
+    .skill-link:hover {
+      background: var(--accent);
+      color: #000;
+      text-decoration: none;
+    }
+
+    .progress-label {
+      font-size: 12px;
+      color: var(--text-secondary);
+      margin-bottom: 10px;
+      display: flex;
+      justify-content: space-between;
+    }
+
+    .progress-bar {
+      width: 100%;
+      height: 6px;
+      background: var(--bg-tertiary);
+      border-radius: 3px;
+      overflow: hidden;
+      border: 1px solid var(--border);
+    }
+
+    .progress-fill {
+      height: 100%;
+      background: linear-gradient(90deg, var(--accent-green), var(--accent));
+      border-radius: 3px;
+      transition: width 0.3s ease;
+    }
+
+    /* Tips Panel */
+    .tips-list {
+      list-style: none;
+    }
+
+    .tips-list li {
+      font-size: 13px;
+      color: var(--text-secondary);
+      margin-bottom: 12px;
+      padding-left: 16px;
+      position: relative;
+      line-height: 1.5;
+    }
+
+    .tips-list li:last-child {
+      margin-bottom: 0;
+    }
+
+    .tips-list li::before {
+      content: '★';
+      position: absolute;
+      left: 0;
+      color: var(--accent-orange);
+    }
+
+    /* Timer Panel */
+    .timer-display {
+      text-align: center;
+      margin-bottom: 20px;
+    }
+
+    .timer-time {
+      font-size: 48px;
+      font-weight: 700;
+      font-family: var(--font-mono);
+      color: var(--accent);
+      line-height: 1;
+      margin-bottom: 16px;
+    }
+
+    .timer-controls {
+      display: flex;
+      gap: 8px;
+      justify-content: center;
+    }
+
+    .btn-timer {
+      padding: 8px 14px;
+      font-size: 12px;
+      font-weight: 600;
+      border: 1px solid var(--border);
+      background: var(--bg-tertiary);
+      color: var(--text-primary);
+      border-radius: 6px;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+
+    .btn-timer:hover {
+      background: var(--accent);
+      border-color: var(--accent);
+      color: #000;
+    }
+
+    .btn-timer.active {
+      background: var(--accent-green);
+      border-color: var(--accent-green);
+      color: #000;
+    }
+
+    /* ============================================
+       MAIN CONTENT: Song header + sections
+       ============================================ */
+
+    .practice-main {
+      min-width: 0;
+    }
+
+    .back-nav {
+      margin-bottom: 32px;
+    }
+
+    .back-link {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      color: var(--text-secondary);
+      font-size: 14px;
+      font-weight: 500;
+      padding: 8px 12px;
+      margin-left: -12px;
+      border-radius: 6px;
+      text-decoration: none;
+      transition: all 0.2s;
+    }
+
+    .back-link:hover {
+      background: var(--bg-secondary);
+      color: var(--text-primary);
+    }
+
+    /* Song Header */
+    .song-header {
+      margin-bottom: 40px;
+    }
+
+    .song-title {
+      font-size: 40px;
+      font-weight: 700;
+      letter-spacing: -0.02em;
+      margin-bottom: 8px;
+      color: var(--text-primary);
+    }
+
+    .song-artist {
+      font-size: 18px;
+      color: var(--text-secondary);
+      margin-bottom: 24px;
+    }
+
+    .song-meta {
+      display: flex;
+      gap: 12px;
+      flex-wrap: wrap;
+      margin-bottom: 16px;
+    }
+
+    .meta-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 8px 14px;
+      background: var(--bg-secondary);
+      border: 1px solid var(--border);
+      border-radius: 100px;
+      font-size: 13px;
+      color: var(--text-primary);
+      font-weight: 500;
+    }
+
+    .meta-badge.difficulty {
+      color: var(--accent-orange);
+    }
+
+    .difficulty-dots {
+      display: flex;
+      gap: 3px;
+    }
+
+    .dot {
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      background: var(--accent-orange);
+    }
+
+    .dot.empty {
+      background: var(--border);
+    }
+
+    .sticky-section-nav {
+      position: sticky;
+      top: 20px;
+      z-index: 100;
+      margin-bottom: 40px;
+      display: flex;
+      justify-content: center;
+    }
+
+    .section-pills {
+      background: rgba(22, 27, 34, 0.8);
+      backdrop-filter: blur(12px);
+      -webkit-backdrop-filter: blur(12px);
+      padding: 6px;
+      border-radius: 100px;
+      border: 1px solid var(--border);
+      box-shadow: 0 4px 20px rgba(0, 0, 0, 0.4);
+      display: flex;
+      gap: 4px;
+      flex-wrap: wrap;
+      justify-content: center;
+    }
+
+    .section-pills a {
+      padding: 8px 20px;
+      border-radius: 100px;
+      font-size: 14px;
+      font-weight: 500;
+      color: var(--text-secondary);
+      text-decoration: none;
+      transition: all 0.2s ease;
+    }
+
+    .section-pills a:hover {
+      color: var(--text-primary);
+      background: var(--bg-tertiary);
+      text-decoration: none;
+    }
+
+    .section-pills a.active {
+      background: var(--accent);
+      color: #fff;
+      box-shadow: 0 2px 10px rgba(88, 166, 255, 0.3);
+    }
+
+    /* Content Sections */
+    .practice-section {
+      margin-bottom: 60px;
+      scroll-margin-top: 100px;
+    }
+
+    .section-heading {
+      font-size: 24px;
+      font-weight: 600;
+      color: var(--text-primary);
+      margin-bottom: 24px;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .section-heading::before {
+      content: '';
+      display: block;
+      width: 4px;
+      height: 24px;
+      background: var(--accent);
+      border-radius: 2px;
+    }
+
+    /* Tab / Chord Display */
+    .view-toggle {
+      display: flex;
+      gap: 8px;
+      margin-bottom: 20px;
+    }
+
+    .toggle-btn {
+      padding: 8px 16px;
+      font-size: 13px;
+      font-weight: 600;
+      border: 1px solid var(--border);
+      background: var(--bg-secondary);
+      color: var(--text-primary);
+      border-radius: 6px;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+
+    .toggle-btn.active {
+      background: var(--accent);
+      border-color: var(--accent);
+      color: #000;
+    }
+
+    .tab-container {
+      background: var(--bg-secondary);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      overflow: hidden;
+      margin-bottom: 24px;
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+    }
+
+    .tab-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 12px 20px;
+      background: rgba(255, 255, 255, 0.03);
+      border-bottom: 1px solid var(--border);
+    }
+
+    .tab-title {
+      font-family: var(--font-mono);
+      font-size: 13px;
+      color: var(--text-secondary);
+      font-weight: 600;
+    }
+
+    .copy-btn {
+      background: transparent;
+      border: 1px solid var(--border);
+      color: var(--text-secondary);
+      padding: 6px 12px;
+      border-radius: 6px;
+      font-size: 12px;
+      font-family: var(--font-sans);
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+
+    .copy-btn:hover {
+      background: var(--bg-tertiary);
+      color: var(--text-primary);
+      border-color: var(--text-muted);
+    }
+
+    .copy-btn.copied {
+      background: rgba(63, 185, 80, 0.15);
+      border-color: transparent;
+      color: var(--accent-green);
+    }
+
+    .tab-content {
+      overflow-x: auto;
+      padding: 24px;
+    }
+
+    pre.tab {
+      font-family: var(--font-mono);
+      font-size: 13px;
+      line-height: 1.5;
+      color: var(--text-primary);
+      margin: 0;
+      white-space: pre;
+      tab-size: 4;
+      -moz-tab-size: 4;
+    }
+
+    /* Video Section */
+    .video-wrapper {
+      position: relative;
+      width: 100%;
+      max-width: 640px;
+      border-radius: 12px;
+      overflow: hidden;
+      aspect-ratio: 16/9;
+      background: #000;
+      box-shadow: 0 8px 30px rgba(0, 0, 0, 0.5);
+      border: 1px solid var(--border);
+      margin-bottom: 24px;
+    }
+
+    .video-thumbnail {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      opacity: 0.9;
+      transition: opacity 0.3s;
+      cursor: pointer;
+    }
+
+    .video-wrapper:hover .video-thumbnail {
+      opacity: 0.7;
+    }
+
+    .video-play-btn {
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      width: 80px;
+      height: 80px;
+      background: rgba(255, 255, 255, 0.1);
+      backdrop-filter: blur(4px);
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      pointer-events: none;
+      transition: transform 0.2s ease, background 0.2s;
+      border: 1px solid rgba(255, 255, 255, 0.2);
+    }
+
+    .video-play-btn svg {
+      width: 32px;
+      height: 32px;
+      fill: #fff;
+      margin-left: 4px;
+    }
+
+    .video-wrapper:hover .video-play-btn {
+      transform: translate(-50%, -50%) scale(1.1);
+      background: var(--accent);
+      border-color: var(--accent);
+    }
+
+    .video-wrapper iframe {
+      width: 100%;
+      height: 100%;
+      border: none;
+    }
+
+    /* Practice Section Checklist */
+    .section-checklist {
+      background: var(--bg-secondary);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 20px;
+    }
+
+    .checklist-item {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 14px;
+      margin-bottom: 10px;
+      background: var(--bg-tertiary);
+      border-radius: 8px;
+      border: 1px solid var(--border);
+      transition: all 0.2s;
+    }
+
+    .checklist-item:last-child {
+      margin-bottom: 0;
+    }
+
+    .checklist-item input[type="checkbox"] {
+      width: 20px;
+      height: 20px;
+      cursor: pointer;
+      accent-color: var(--accent-green);
+    }
+
+    .checklist-label {
+      flex: 1;
+      font-size: 14px;
+      color: var(--text-primary);
+      font-weight: 500;
+      cursor: pointer;
+    }
+
+    .checklist-item input[type="checkbox"]:checked + .checklist-label {
+      color: var(--text-muted);
+      text-decoration: line-through;
+    }
+
+    .checklist-progress {
+      margin-top: 20px;
+      padding-top: 20px;
+      border-top: 1px solid var(--border);
+    }
+
+    /* Reflection Section */
+    .reflection-card {
+      background: var(--bg-secondary);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 24px;
+    }
+
+    .mood-selector {
+      display: flex;
+      justify-content: space-around;
+      gap: 10px;
+      margin-bottom: 24px;
+      flex-wrap: wrap;
+    }
+
+    .mood-btn {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 6px;
+      background: var(--bg-tertiary);
+      border: 2px solid var(--border);
+      border-radius: 10px;
+      padding: 12px 16px;
+      cursor: pointer;
+      transition: all 0.2s;
+      font-size: 28px;
+      flex: 1;
+      min-width: 80px;
+    }
+
+    .mood-btn:hover {
+      border-color: var(--accent);
+      background: rgba(88, 166, 255, 0.08);
+    }
+
+    .mood-btn.active {
+      border-color: var(--accent);
+      background: rgba(88, 166, 255, 0.15);
+      box-shadow: 0 2px 10px rgba(88, 166, 255, 0.3);
+    }
+
+    .mood-label {
+      font-size: 11px;
+      color: var(--text-secondary);
+      font-weight: 600;
+      text-align: center;
+    }
+
+    .notes-field {
+      margin-top: 20px;
+    }
+
+    .notes-label {
+      display: block;
+      font-size: 13px;
+      font-weight: 600;
+      color: var(--text-primary);
+      margin-bottom: 10px;
+    }
+
+    .notes-textarea {
+      width: 100%;
+      height: 120px;
+      background: var(--bg-tertiary);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 12px;
+      font-family: var(--font-sans);
+      font-size: 14px;
+      color: var(--text-primary);
+      resize: vertical;
+      transition: border-color 0.2s;
+    }
+
+    .notes-textarea:focus {
+      outline: none;
+      border-color: var(--accent);
+      box-shadow: 0 0 0 3px rgba(88, 166, 255, 0.1);
+    }
+
+    .save-session-btn {
+      display: inline-block;
+      margin-top: 20px;
+      padding: 12px 28px;
+      font-size: 14px;
+      font-weight: 600;
+      background: var(--accent-green);
+      color: #000;
+      border: none;
+      border-radius: 8px;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+
+    .save-session-btn:hover {
+      background: #45dc75;
+      transform: translateY(-2px);
+      box-shadow: 0 4px 12px rgba(63, 185, 80, 0.3);
+    }
+
+    /* Placeholder Section */
+    .placeholder-section {
+      background: var(--bg-secondary);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 40px;
+      text-align: center;
+    }
+
+    .placeholder-text {
+      color: var(--text-muted);
+      font-size: 14px;
+      margin-bottom: 12px;
+    }
+
+    /* ============================================
+       RESPONSIVE: Mobile-first adjustments
+       ============================================ */
+
+    @media (max-width: 1024px) {
+      .practice-wrapper {
+        grid-template-columns: 1fr;
+        gap: 24px;
+      }
+
+      .practice-sidebar {
+        display: grid;
+        grid-template-columns: repeat(2, 1fr);
+        gap: 16px;
+        position: relative;
+        top: 0;
+        height: auto;
+      }
+
+      .sidebar-panel {
+        padding: 16px;
+      }
+    }
+
+    @media (max-width: 768px) {
+      .practice-wrapper {
+        padding: 24px 16px;
+      }
+
+      .song-title {
+        font-size: 28px;
+      }
+
+      .practice-sidebar {
+        grid-template-columns: 1fr;
+      }
+
+      .section-pills {
+        width: 100%;
+        overflow-x: auto;
+        border-radius: 12px;
+        padding: 12px;
+      }
+
+      .section-pills a {
+        flex-shrink: 0;
+      }
+
+      .mood-selector {
+        gap: 6px;
+      }
+
+      .mood-btn {
+        padding: 10px 12px;
+        min-width: 60px;
+        font-size: 24px;
+      }
+
+      .mood-label {
+        font-size: 10px;
+      }
+    }
+  </style>
+</head>
+<body>
+
+<div class="practice-wrapper">
+  
+  <!-- LEFT SIDEBAR -->
+  <aside class="practice-sidebar">
+    
+    <!-- Song Stats Panel -->
+    <div class="sidebar-panel">
+      <div class="panel-title">Practice Stats</div>
+      <div class="stat-item">
+        <span class="stat-label">Total Time</span>
+        <span class="stat-value" id="totalTime">
+          <span class="stat-default">No data yet</span>
+        </span>
+      </div>
+      <div class="stat-item">
+        <span class="stat-label">Sessions</span>
+        <span class="stat-value" id="sessionCount">
+          <span class="stat-default">0</span>
+        </span>
+      </div>
+      <div class="stat-item">
+        <span class="stat-label">Last Played</span>
+        <span class="stat-value" id="lastPlayed">
+          <span class="stat-default">Never</span>
+        </span>
+      </div>
+    </div>
+
+    <!-- Skills Required Panel -->
+    <div class="sidebar-panel">
+      <div class="panel-title">Skills Required</div>
+      <ul class="skill-list" id="skillsList"></ul>
+      <div class="progress-label" style="margin-top: 16px;">
+        <span>Progress</span>
+        <span id="skillProgress">0%</span>
+      </div>
+      <div class="progress-bar">
+        <div class="progress-fill" id="progressFill" style="width: 0%;"></div>
+      </div>
+    </div>
+
+    <!-- Quick Tips Panel -->
+    <div class="sidebar-panel">
+      <div class="panel-title">Quick Tips</div>
+      <ul class="tips-list" id="tipsList"></ul>
+    </div>
+
+    <!-- Practice Timer Panel -->
+    <div class="sidebar-panel">
+      <div class="panel-title">Practice Timer</div>
+      <div class="timer-display">
+        <div class="timer-time" id="timerDisplay">00:00</div>
+        <div class="timer-controls">
+          <button class="btn-timer" id="btnTimerStart">Start</button>
+          <button class="btn-timer" id="btnTimerPause" disabled>Pause</button>
+          <button class="btn-timer" id="btnTimerReset">Reset</button>
+        </div>
+      </div>
+    </div>
+
+  </aside>
+
+  <!-- MAIN CONTENT -->
+  <main class="practice-main">
+    
+    <div class="back-nav">
+      <a href="./" class="back-link">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="19" y1="12" x2="5" y2="12"></line><polyline points="12 19 5 12 12 5"></polyline></svg>
+        Back to Song Bank
+      </a>
+    </div>
+
+    <!-- Song Header -->
+    <div class="song-header">
+      <h1 class="song-title" id="songTitle">Loading...</h1>
+      <p class="song-artist" id="songArtist"></p>
+      
+      <div class="song-meta">
+        <span class="meta-badge difficulty">
+          <span id="difficultyLabel">Difficulty</span>
+          <span class="difficulty-dots" id="difficultyDots"></span>
+        </span>
+        <span class="meta-badge" id="keyBadge">Key: C</span>
+        <span class="meta-badge" id="capoBadge">No Capo</span>
+        <span class="meta-badge" id="styleBadge">Style: Fingerpicking</span>
+      </div>
+    </div>
+
+    <!-- Sticky Section Navigation -->
+    <div class="sticky-section-nav">
+      <div class="section-pills">
+        <a href="#tabs" class="section-nav-link">Tabs & Chords</a>
+        <a href="#video" class="section-nav-link">Video</a>
+        <a href="#instructional" class="section-nav-link">Instructional</a>
+        <a href="#sections" class="section-nav-link">Practice</a>
+        <a href="#reflection" class="section-nav-link">Reflection</a>
+      </div>
+    </div>
+
+    <!-- Tabs & Chords Section -->
+    <section id="tabs" class="practice-section">
+      <h2 class="section-heading">Tabs & Chords</h2>
+      
+      <div class="view-toggle">
+        <button class="toggle-btn active" data-view="melody">Melody Tab</button>
+        <button class="toggle-btn" data-view="chords">Chord Version</button>
+      </div>
+
+      <div id="tabContent"></div>
+    </section>
+
+    <!-- Video Section -->
+    <section id="video" class="practice-section">
+      <h2 class="section-heading">Listen & Learn</h2>
+      
+      <div class="video-wrapper" id="videoWrapper" data-video-id="">
+        <img class="video-thumbnail" id="videoThumbnail" src="" alt="Song video">
+        <div class="video-play-btn">
+          <svg viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg>
+        </div>
+      </div>
+    </section>
+
+    <!-- Instructional Section -->
+    <section id="instructional" class="practice-section">
+      <h2 class="section-heading">Instructional Walkthrough</h2>
+      
+      <div class="placeholder-section">
+        <p class="placeholder-text">Instructional walkthrough coming soon</p>
+        <p class="placeholder-text">Space for teacher-recorded or curated tutorial video</p>
+      </div>
+    </section>
+
+    <!-- Practice Sections Checklist -->
+    <section id="sections" class="practice-section">
+      <h2 class="section-heading">Section by Section</h2>
+      
+      <div class="section-checklist" id="sectionsChecklist"></div>
+    </section>
+
+    <!-- Reflection Section -->
+    <section id="reflection" class="practice-section">
+      <h2 class="section-heading">Session Reflection</h2>
+      
+      <div class="reflection-card">
+        <p style="color: var(--text-secondary); margin-bottom: 20px;">How did today's practice feel?</p>
+        
+        <div class="mood-selector" id="moodSelector">
+          <button class="mood-btn" data-mood="frustrated" title="Frustrated">
+            <span>😤</span>
+            <span class="mood-label">Frustrated</span>
+          </button>
+          <button class="mood-btn" data-mood="okay" title="Okay">
+            <span>😐</span>
+            <span class="mood-label">Okay</span>
+          </button>
+          <button class="mood-btn" data-mood="good" title="Good">
+            <span>🙂</span>
+            <span class="mood-label">Good</span>
+          </button>
+          <button class="mood-btn" data-mood="great" title="Great">
+            <span>😊</span>
+            <span class="mood-label">Great</span>
+          </button>
+          <button class="mood-btn" data-mood="crushing" title="Crushing It">
+            <span>🔥</span>
+            <span class="mood-label">Crushing It</span>
+          </button>
+        </div>
+
+        <div class="notes-field">
+          <label class="notes-label">Practice Notes</label>
+          <textarea class="notes-textarea" id="notesTextarea" placeholder="What went well? What could improve? Any breakthroughs today?"></textarea>
+        </div>
+
+        <button class="save-session-btn" id="saveSessionBtn">Save Session</button>
+      </div>
+    </section>
+
+  </main>
+
+</div>
+
+<!-- Scripts -->
+<script>
+  // ============================================
+  // SONG DATA: Hardcoded for now, expandable
+  // ============================================
+
+  const SONG_DATA = {
+    'remember-me': {
+      title: 'Remember Me (Lullaby)',
+      artist: 'from Coco',
+      difficulty: 2,
+      key: 'C',
+      capo: 'No capo',
+      style: 'Fingerpicking',
+      videoId: 'KP_XkN2v7OM',
+      requiredSkills: [
+        { id: 'CHORD-009', name: 'C Chord' },
+        { id: 'CHORD-007', name: 'G Chord' },
+        { id: 'CHORD-003', name: 'Am Chord' },
+        { id: 'CHORD-001', name: 'F Chord' },
+        { id: 'FING-005', name: 'Fingerpicking' }
+      ],
+      sections: ['Intro', 'Verse', 'Chorus', 'Bridge', 'Outro'],
+      tips: [
+        'Focus on letting each string ring clearly during the fingerpicking pattern',
+        'The chord changes happen slowly — you have time to switch',
+        'Try humming along while you play to feel the rhythm',
+        'If fingerpicking is hard, try strumming gently first'
+      ],
+      tabs: {
+        melody: `e|-10--12---------------------8-8--10-10---10-12--------12-13-12-12-10-10--8-8-17-17-15-15-12-12----15-13-13-|
+B|-----------13--------------------------------------13-------------------------------------------------13----------|
+G|--------------12---12-10-10-----------------------12--------------------------------------------------------------|
+D|------------------------------------------------------------------------------------------------------------------|
+A|------------------------------------------------------------------------------------------------------------------|
+E|------------------------------------------------------------------------------------------------------------------|
+
+e|-12-12-------15-15-13-13-12-12----11-10-10-8-10-10-12-----------------8-8-10-10-12-13-12--12-12-13-13-12-12-|
+B|-------10-10-------------------13---------------------13--------------------------------------------|
+G|--------------------------------------------12-12-10-10---------------------------------------------|
+D|----------------------------------------------------------------------------------------------------|
+A|----------------------------------------------------------------------------------------------------|
+E|----------------------------------------------------------------------------------------------------|
+
+e|-13-15-----20-20--19-19-17-17-15-15-12-12-10-8--8-8-11-11-16-16-20-22-22-20-19-20-|
+B|--------13-----------------------------------------------------------------------|
+G|---------------------------------------------------------------------------------|
+D|---------------------------------------------------------------------------------|
+A|---------------------------------------------------------------------------------|
+E|---------------------------------------------------------------------------------|`,
+        chords: `e|------------------------|------------------------|
+B|---1--1--1--1--1--1--1--|---1--1--1--1--1--1--1--|
+G|---0--0--0--0--0--0--0--|---1--1--1--1--1--1--1--|
+D|---2--2--2--2--2--2--2--|---0--0--0--0--0--0--0--|
+A|3----------------------|------------------------|
+E|------------------------|4----------------------|
+   Remember me              though I have to say goodbye
+
+e|------------------------|------------------------|
+B|---1--1--1--1--1--1--1--|---1--1--1-----0--0--0--|
+G|---0--0--0--0--0--0--0--|---1--1--1-----1--1--1--|
+D|---2--2--2--2--2--2--2--|---0--0--0-----0--0--0--|
+A|3----------------------|1----------------------|
+E|------------------------|------------0----------|
+   Remember me              don't let it make you cry`
+      }
+    }
+  };
+
+  // ============================================
+  // INITIALIZATION & DOM SETUP
+  // ============================================
+
+  let currentSong = null;
+  let timerInterval = null;
+  let timerSeconds = 0;
+  let isTimerRunning = false;
+  let selectedMood = null;
+  let completedSections = new Set();
+
+  function init() {
+    const params = new URLSearchParams(window.location.search);
+    const songSlug = params.get('song') || 'remember-me';
+
+    currentSong = SONG_DATA[songSlug];
+    if (!currentSong) {
+      document.body.innerHTML = '<div style="padding: 40px; text-align: center; color: var(--text-secondary);">Song not found</div>';
+      return;
+    }
+
+    populateSongData();
+    setupEventListeners();
+    setupVideoPlayer();
+    loadPracticeData();
+    updateSectionNav();
+  }
+
+  function populateSongData() {
+    // Header
+    document.getElementById('songTitle').textContent = currentSong.title;
+    document.getElementById('songArtist').textContent = currentSong.artist;
+
+    // Meta badges
+    document.getElementById('difficultyLabel').textContent = `Difficulty (${currentSong.difficulty}/5)`;
+    document.getElementById('difficultyDots').innerHTML = Array(5)
+      .fill(0)
+      .map((_, i) => `<span class="dot ${i >= currentSong.difficulty ? 'empty' : ''}"></span>`)
+      .join('');
+    document.getElementById('keyBadge').textContent = `Key: ${currentSong.key}`;
+    document.getElementById('capoBadge').textContent = currentSong.capo;
+    document.getElementById('styleBadge').textContent = `Style: ${currentSong.style}`;
+
+    // Skills
+    populateSkills();
+
+    // Tips
+    populateTips();
+
+    // Tabs
+    populateTabs();
+
+    // Sections checklist
+    populateSectionsChecklist();
+  }
+
+  function populateSkills() {
+    const skillsList = document.getElementById('skillsList');
+    skillsList.innerHTML = currentSong.requiredSkills.map(skill => `
+      <li class="skill-item">
+        <input type="checkbox" class="skill-checkbox" data-skill-id="${skill.id}" />
+        <span class="skill-name">${skill.name}</span>
+        <a href="skill.html?id=${skill.id}" class="skill-link" title="View skill">→</a>
+      </li>
+    `).join('');
+  }
+
+  function populateTips() {
+    const tipsList = document.getElementById('tipsList');
+    tipsList.innerHTML = currentSong.tips.map(tip => `<li>${tip}</li>`).join('');
+  }
+
+  function populateTabs() {
+    const tabContent = document.getElementById('tabContent');
+    tabContent.innerHTML = `
+      <div class="tab-container">
+        <div class="tab-header">
+          <span class="tab-title">MELODY.TAB</span>
+          <button class="copy-btn" data-tab="melody">Copy Tab</button>
+        </div>
+        <div class="tab-content">
+          <pre class="tab">${currentSong.tabs.melody}</pre>
+        </div>
+      </div>
+      <div class="tab-container" style="display: none;" id="chordsContainer">
+        <div class="tab-header">
+          <span class="tab-title">CHORDS.TAB</span>
+          <button class="copy-btn" data-tab="chords">Copy Tab</button>
+        </div>
+        <div class="tab-content">
+          <pre class="tab">${currentSong.tabs.chords}</pre>
+        </div>
+      </div>
+    `;
+  }
+
+  function populateSectionsChecklist() {
+    const checklist = document.getElementById('sectionsChecklist');
+    checklist.innerHTML = currentSong.sections.map(section => `
+      <div class="checklist-item">
+        <input type="checkbox" class="section-check" data-section="${section}" />
+        <label class="checklist-label">I can play this section</label>
+        <span style="color: var(--text-muted); font-size: 12px;">${section}</span>
+      </div>
+    `).join('');
+
+    const checklist_progress = document.createElement('div');
+    checklist_progress.className = 'checklist-progress';
+    checklist_progress.innerHTML = `
+      <div class="progress-label">
+        <span>Sections Completed</span>
+        <span id="sectionsProgress">0/${currentSong.sections.length}</span>
+      </div>
+      <div class="progress-bar">
+        <div class="progress-fill" id="sectionsProgressFill" style="width: 0%;"></div>
+      </div>
+    `;
+    checklist.appendChild(checklist_progress);
+  }
+
+  function setupVideoPlayer() {
+    const wrapper = document.getElementById('videoWrapper');
+    const thumbnail = document.getElementById('videoThumbnail');
+    const videoId = currentSong.videoId;
+
+    wrapper.dataset.videoId = videoId;
+    thumbnail.src = `https://img.youtube.com/vi/${videoId}/maxresdefault.jpg`;
+
+    wrapper.addEventListener('click', loadYoutubeVideo);
+  }
+
+  function loadYoutubeVideo() {
+    const wrapper = document.getElementById('videoWrapper');
+    const videoId = wrapper.dataset.videoId;
+
+    if (!wrapper.querySelector('iframe')) {
+      const iframe = document.createElement('iframe');
+      iframe.src = `https://www.youtube.com/embed/${videoId}?autoplay=1`;
+      iframe.allow = 'accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture';
+      iframe.allowFullscreen = true;
+      wrapper.innerHTML = '';
+      wrapper.appendChild(iframe);
+    }
+  }
+
+  function setupEventListeners() {
+    // Tab/Chord toggle
+    document.querySelectorAll('.toggle-btn').forEach(btn => {
+      btn.addEventListener('click', () => {
+        document.querySelectorAll('.toggle-btn').forEach(b => b.classList.remove('active'));
+        btn.classList.add('active');
+
+        const view = btn.dataset.view;
+        const melodyContainer = document.querySelector('.tab-container');
+        const chordsContainer = document.getElementById('chordsContainer');
+
+        if (view === 'melody') {
+          melodyContainer.style.display = '';
+          chordsContainer.style.display = 'none';
+        } else {
+          melodyContainer.style.display = 'none';
+          chordsContainer.style.display = '';
+        }
+      });
+    });
+
+    // Copy buttons
+    document.querySelectorAll('.copy-btn').forEach(btn => {
+      btn.addEventListener('click', () => copyTabContent(btn));
+    });
+
+    // Section navigation
+    document.querySelectorAll('.section-nav-link').forEach(link => {
+      link.addEventListener('click', (e) => {
+        e.preventDefault();
+        document.querySelectorAll('.section-nav-link').forEach(l => l.classList.remove('active'));
+        link.classList.add('active');
+      });
+    });
+
+    // Timer buttons
+    document.getElementById('btnTimerStart').addEventListener('click', startTimer);
+    document.getElementById('btnTimerPause').addEventListener('click', pauseTimer);
+    document.getElementById('btnTimerReset').addEventListener('click', resetTimer);
+
+    // Mood selector
+    document.querySelectorAll('.mood-btn').forEach(btn => {
+      btn.addEventListener('click', () => {
+        document.querySelectorAll('.mood-btn').forEach(b => b.classList.remove('active'));
+        btn.classList.add('active');
+        selectedMood = btn.dataset.mood;
+      });
+    });
+
+    // Sections checklist
+    document.querySelectorAll('.section-check').forEach(check => {
+      check.addEventListener('change', updateSectionProgress);
+    });
+
+    // Save session
+    document.getElementById('saveSessionBtn').addEventListener('click', saveSession);
+
+    // Skill checkboxes
+    document.querySelectorAll('.skill-checkbox').forEach(check => {
+      check.addEventListener('change', updateSkillProgress);
+    });
+  }
+
+  function copyTabContent(btn) {
+    const tabContent = btn.parentElement.nextElementSibling.querySelector('pre');
+    const text = tabContent.textContent;
+
+    navigator.clipboard.writeText(text).then(() => {
+      const originalText = btn.textContent;
+      btn.textContent = 'Copied!';
+      btn.classList.add('copied');
+
+      setTimeout(() => {
+        btn.textContent = originalText;
+        btn.classList.remove('copied');
+      }, 2000);
+    });
+  }
+
+  function startTimer() {
+    if (isTimerRunning) return;
+    isTimerRunning = true;
+    document.getElementById('btnTimerStart').disabled = true;
+    document.getElementById('btnTimerPause').disabled = false;
+
+    timerInterval = setInterval(() => {
+      timerSeconds++;
+      updateTimerDisplay();
+    }, 1000);
+  }
+
+  function pauseTimer() {
+    isTimerRunning = false;
+    clearInterval(timerInterval);
+    document.getElementById('btnTimerStart').disabled = false;
+    document.getElementById('btnTimerPause').disabled = true;
+  }
+
+  function resetTimer() {
+    pauseTimer();
+    timerSeconds = 0;
+    updateTimerDisplay();
+  }
+
+  function updateTimerDisplay() {
+    const minutes = Math.floor(timerSeconds / 60);
+    const seconds = timerSeconds % 60;
+    document.getElementById('timerDisplay').textContent = 
+      `${String(minutes).padStart(2, '0')}:${String(seconds).padStart(2, '0')}`;
+  }
+
+  function updateSectionProgress() {
+    const checks = document.querySelectorAll('.section-check:checked');
+    const total = document.querySelectorAll('.section-check').length;
+    const percent = (checks.length / total) * 100;
+
+    document.getElementById('sectionsProgress').textContent = `${checks.length}/${total}`;
+    document.getElementById('sectionsProgressFill').style.width = `${percent}%`;
+  }
+
+  function updateSkillProgress() {
+    const checks = document.querySelectorAll('.skill-checkbox:checked');
+    const total = document.querySelectorAll('.skill-checkbox').length;
+    const percent = (checks.length / total) * 100;
+
+    document.getElementById('skillProgress').textContent = `${Math.round(percent)}%`;
+    document.getElementById('progressFill').style.width = `${percent}%`;
+  }
+
+  function loadPracticeData() {
+    // Placeholder for loading saved practice data from localStorage or API
+    // This will be replaced with actual API calls
+  }
+
+  function saveSession() {
+    if (!selectedMood) {
+      alert('Please select a mood for this session');
+      return;
+    }
+
+    const notes = document.getElementById('notesTextarea').value;
+    const duration = timerSeconds;
+    const completedCount = document.querySelectorAll('.section-check:checked').length;
+
+    console.log('Session saved:', {
+      song: currentSong.title,
+      mood: selectedMood,
+      notes: notes,
+      duration: duration,
+      completedSections: completedCount,
+      timestamp: new Date().toISOString()
+    });
+
+    alert('Session saved! Great work today!');
+    resetTimer();
+  }
+
+  function updateSectionNav() {
+    // Intersection observer for active section highlighting
+    const observer = new IntersectionObserver((entries) => {
+      entries.forEach(entry => {
+        if (entry.isIntersecting) {
+          const id = entry.target.id;
+          document.querySelectorAll('.section-nav-link').forEach(link => {
+            link.classList.remove('active');
+            if (link.getAttribute('href') === `#${id}`) {
+              link.classList.add('active');
+            }
+          });
+        }
+      });
+    }, { threshold: 0.3 });
+
+    document.querySelectorAll('.practice-section').forEach(section => {
+      observer.observe(section);
+    });
+  }
+
+  // Initialize on page load
+  init();
+</script>
+
+</body>
+</html>
