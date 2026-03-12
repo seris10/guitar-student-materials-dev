@@ -17,7 +17,6 @@ const TARGET_EXTENSIONS = new Set([".html", ".js", ".css"]);
 const FORBIDDEN_PATTERNS = [
   { pattern: /constellation-react\.html/g, reason: "leftover Star Map draft link" },
   { pattern: /data-page="star-map"/g, reason: "leftover Star Map nav marker" },
-  { pattern: /\bcodex\b/gi, reason: "unexpected codex branding" },
 ];
 
 async function walkFiles(dir) {

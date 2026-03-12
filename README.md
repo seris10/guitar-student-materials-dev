@@ -88,7 +88,6 @@ Smoke checks verify:
 
 - core pages exist and contain complete HTML structure
 - no stale Star Map draft route references
-- no unexpected `codex` branding in frontend assets
 
 ## CI/CD
 
