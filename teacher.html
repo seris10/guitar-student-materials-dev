@@ -1,0 +1,1164 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Guitar Club - Admin Dashboard</title>
+  <link rel="stylesheet" href="styles/base.css">
+  <link rel="stylesheet" href="styles/layout.css">
+  <link rel="stylesheet" href="styles/components.css">
+  <script src="scripts/api.js"></script>
+  <script src="scripts/auth.js"></script>
+  <style>
+    /* ===== Admin Dashboard Styles ===== */
+    .teacher-page {
+      padding: 24px;
+      max-width: 1200px;
+    }
+
+    .page-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 24px;
+      flex-wrap: wrap;
+      gap: 12px;
+    }
+
+    .page-header h1 {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      font-size: 1.5rem;
+    }
+
+    .page-header h1 svg { width: 28px; height: 28px; color: var(--accent); }
+
+    /* Tabs */
+    .admin-tabs {
+      display: flex;
+      gap: 4px;
+      background: var(--bg-secondary);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 4px;
+      margin-bottom: 24px;
+    }
+
+    .admin-tab {
+      flex: 1;
+      padding: 10px 16px;
+      background: transparent;
+      border: none;
+      border-radius: 8px;
+      color: var(--text-secondary);
+      font-size: 0.9rem;
+      font-weight: 500;
+      cursor: pointer;
+      transition: all 0.2s;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+    }
+
+    .admin-tab:hover { color: var(--text-primary); background: var(--bg-tertiary); }
+    .admin-tab.active { background: var(--accent); color: #000; font-weight: 600; }
+    .admin-tab svg { width: 18px; height: 18px; }
+
+    .tab-panel { display: none; }
+    .tab-panel.active { display: block; }
+
+    /* Stats Overview */
+    .stats-overview {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 12px;
+      margin-bottom: 24px;
+    }
+
+    .overview-card {
+      background: var(--bg-secondary);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 16px;
+      text-align: center;
+    }
+
+    .overview-card .label {
+      font-size: 0.8rem;
+      color: var(--text-muted);
+      margin-bottom: 4px;
+    }
+
+    .overview-card .value {
+      font-size: 1.5rem;
+      font-weight: 700;
+    }
+
+    .overview-card .value.accent { color: var(--accent); }
+    .overview-card .value.green { color: #3fb950; }
+    .overview-card .value.orange { color: #d29922; }
+
+    /* Table styles */
+    .data-table-wrap {
+      overflow-x: auto;
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      background: var(--bg-secondary);
+    }
+
+    .data-table {
+      width: 100%;
+      border-collapse: collapse;
+    }
+
+    .data-table th {
+      text-align: left;
+      padding: 12px 16px;
+      font-size: 0.8rem;
+      font-weight: 600;
+      color: var(--text-muted);
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      border-bottom: 1px solid var(--border);
+    }
+
+    .data-table td {
+      padding: 12px 16px;
+      font-size: 0.9rem;
+      border-bottom: 1px solid var(--border);
+      vertical-align: middle;
+    }
+
+    .data-table tr:last-child td { border-bottom: none; }
+    .data-table tr:hover td { background: var(--bg-tertiary); }
+
+    .student-cell {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .student-avatar-sm {
+      width: 32px;
+      height: 32px;
+      border-radius: 50%;
+      background: var(--bg-tertiary);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .student-avatar-sm svg { width: 18px; height: 18px; color: var(--text-muted); }
+    .student-name-col .name { font-weight: 500; }
+    .student-name-col .username { font-size: 0.8rem; color: var(--text-muted); }
+
+    .rank-badge {
+      display: inline-block;
+      padding: 3px 10px;
+      background: var(--bg-tertiary);
+      border-radius: 12px;
+      font-size: 0.8rem;
+      color: var(--text-secondary);
+    }
+
+    .pin-display {
+      font-family: "SF Mono", "Fira Code", monospace;
+      letter-spacing: 2px;
+      color: var(--accent);
+    }
+
+    .setup-badge {
+      display: inline-block;
+      padding: 2px 8px;
+      border-radius: 8px;
+      font-size: 0.75rem;
+      font-weight: 500;
+    }
+
+    .setup-badge.pending { background: rgba(210, 153, 34, 0.2); color: #d29922; }
+    .setup-badge.done { background: rgba(63, 185, 80, 0.2); color: #3fb950; }
+
+    .action-btns { display: flex; gap: 6px; }
+
+    .btn-icon {
+      padding: 6px;
+      background: transparent;
+      border: 1px solid var(--border);
+      border-radius: 6px;
+      color: var(--text-secondary);
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+
+    .btn-icon:hover { border-color: var(--accent); color: var(--accent); }
+    .btn-icon.danger:hover { border-color: #f85149; color: #f85149; }
+    .btn-icon svg { width: 16px; height: 16px; }
+
+    .btn-primary {
+      padding: 8px 16px;
+      background: var(--accent);
+      color: #000;
+      border: none;
+      border-radius: 8px;
+      font-size: 0.85rem;
+      font-weight: 600;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      transition: all 0.2s;
+    }
+
+    .btn-primary:hover { filter: brightness(1.1); }
+    .btn-primary svg { width: 16px; height: 16px; }
+
+    .btn-secondary {
+      padding: 8px 16px;
+      background: transparent;
+      border: 1px solid var(--border);
+      color: var(--text-primary);
+      border-radius: 8px;
+      font-size: 0.85rem;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+
+    .btn-secondary:hover { border-color: var(--text-secondary); }
+
+    /* Song status badges */
+    .status-badge {
+      display: inline-block;
+      padding: 3px 10px;
+      border-radius: 12px;
+      font-size: 0.8rem;
+      font-weight: 500;
+    }
+
+    .status-badge.pending { background: rgba(210, 153, 34, 0.2); color: #d29922; }
+    .status-badge.ready,
+    .status-badge.approved { background: rgba(63, 185, 80, 0.2); color: #3fb950; }
+    .status-badge.rejected { background: rgba(248, 81, 73, 0.2); color: #f85149; }
+
+    /* Activity list */
+    .activity-list {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+
+    .activity-item {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 12px 16px;
+      background: var(--bg-secondary);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+    }
+
+    .activity-item .icon {
+      width: 36px;
+      height: 36px;
+      border-radius: 8px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+    }
+
+    .activity-item .icon.practice { background: rgba(88, 166, 255, 0.15); color: var(--accent); }
+    .activity-item .icon.login { background: rgba(63, 185, 80, 0.15); color: #3fb950; }
+    .activity-item .icon svg { width: 18px; height: 18px; }
+
+    .activity-item .info { flex: 1; }
+    .activity-item .info .title { font-size: 0.9rem; font-weight: 500; }
+    .activity-item .info .meta { font-size: 0.8rem; color: var(--text-muted); }
+    .activity-item .time { font-size: 0.8rem; color: var(--text-muted); white-space: nowrap; }
+
+    /* Section headers */
+    .section-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 16px;
+    }
+
+    .section-header h2 {
+      font-size: 1.1rem;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .section-header h2 svg { width: 20px; height: 20px; color: var(--accent); }
+
+    /* Modal */
+    .modal-backdrop {
+      display: none;
+      position: fixed;
+      inset: 0;
+      background: rgba(0,0,0,0.6);
+      z-index: 1000;
+      align-items: center;
+      justify-content: center;
+      padding: 24px;
+    }
+
+    .modal-backdrop.open { display: flex; }
+
+    .modal {
+      background: var(--bg-secondary);
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      padding: 24px;
+      width: 100%;
+      max-width: 480px;
+      max-height: 90vh;
+      overflow-y: auto;
+    }
+
+    .modal h2 {
+      font-size: 1.2rem;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      margin-bottom: 4px;
+    }
+
+    .modal h2 svg { width: 22px; height: 22px; color: var(--accent); }
+    .modal .subtitle { color: var(--text-muted); font-size: 0.85rem; margin-bottom: 20px; }
+
+    .form-group { margin-bottom: 16px; }
+    .form-group label { display: block; font-size: 0.85rem; font-weight: 500; margin-bottom: 6px; }
+
+    .form-group input, .form-group select {
+      width: 100%;
+      padding: 10px 14px;
+      background: var(--bg-tertiary);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      color: var(--text-primary);
+      font-size: 0.9rem;
+    }
+
+    .form-group input:focus, .form-group select:focus {
+      outline: none;
+      border-color: var(--accent);
+    }
+
+    .form-hint { font-size: 0.75rem; color: var(--text-muted); margin-top: 4px; }
+
+    .modal-actions {
+      display: flex;
+      gap: 10px;
+      justify-content: flex-end;
+      margin-top: 20px;
+    }
+
+    .generated-pin {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .generated-pin .pin-val {
+      font-family: "SF Mono", "Fira Code", monospace;
+      font-size: 1.3rem;
+      letter-spacing: 3px;
+      color: var(--accent);
+      flex: 1;
+    }
+
+    .btn-gen {
+      padding: 8px 14px;
+      background: var(--bg-tertiary);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      color: var(--text-secondary);
+      font-size: 0.85rem;
+      cursor: pointer;
+    }
+
+    .btn-gen:hover { border-color: var(--accent); color: var(--accent); }
+
+    /* Loading */
+    .loading-msg {
+      text-align: center;
+      padding: 40px;
+      color: var(--text-muted);
+    }
+
+    /* Access denied */
+    .access-denied {
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      text-align: center;
+      padding: 24px;
+    }
+
+    .access-denied svg { width: 80px; height: 80px; color: var(--accent-orange, #d29922); margin-bottom: 24px; }
+    .access-denied h1 { font-size: 1.5rem; margin-bottom: 12px; }
+    .access-denied p { color: var(--text-secondary); margin-bottom: 24px; }
+
+    .access-denied a {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 12px 24px;
+      background: var(--accent);
+      color: #000;
+      border-radius: 10px;
+      text-decoration: none;
+      font-weight: 600;
+    }
+
+    .empty-state { text-align: center; padding: 32px; color: var(--text-muted); }
+    .empty-state svg { width: 48px; height: 48px; margin-bottom: 12px; }
+
+    @media (max-width: 768px) {
+      .stats-overview { grid-template-columns: repeat(2, 1fr); }
+      .admin-tabs { flex-direction: column; }
+      .data-table th:nth-child(n+4), .data-table td:nth-child(n+4) { display: none; }
+    }
+  </style>
+</head>
+<body class="has-app-sidebar">
+
+<!-- Mobile Sidebar Toggle -->
+<button class="sidebar-toggle" id="sidebarToggle" aria-label="Toggle menu">
+  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+    <path d="M3 12h18M3 6h18M3 18h18"/>
+  </svg>
+</button>
+
+<!-- App Sidebar -->
+<nav class="app-sidebar" id="appSidebar">
+  <div class="sidebar-profile">
+    <div class="profile-icon">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+        <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2z"/>
+        <path d="M8 14s1.5 2 4 2 4-2 4-2"/>
+        <circle cx="9" cy="9" r="1" fill="currentColor"/>
+        <circle cx="15" cy="9" r="1" fill="currentColor"/>
+      </svg>
+    </div>
+    <div class="profile-info">
+      <div class="profile-name">Teacher</div>
+      <div class="profile-rank">Instructor</div>
+    </div>
+  </div>
+  <div class="sidebar-nav">
+    <a href="index.html" class="nav-item" data-page="dashboard">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 12h-4l-3 9L9 3l-3 9H2"/></svg>
+      Dashboard
+    </a>
+    <a href="star-map.html" class="nav-item" data-page="clusters">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><circle cx="5" cy="8" r="2"/><circle cx="19" cy="8" r="2"/><circle cx="5" cy="16" r="2"/><circle cx="19" cy="16" r="2"/></svg>
+      Clusters
+    </a>
+    <a href="constellation-react.html" class="nav-item" data-page="star-map">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/></svg>
+      Star Map
+    </a>
+    <a href="constellation-branch1.html" class="nav-item" data-page="foundations">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2L2 7l10 5 10-5-10-5z"/><path d="M2 17l10 5 10-5"/><path d="M2 12l10 5 10-5"/></svg>
+      Foundations
+    </a>
+    <a href="constellation-3d.html" class="nav-item" data-page="3d-map">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/><polyline points="3.27 6.96 12 12.01 20.73 6.96"/><line x1="12" y1="22.08" x2="12" y2="12"/></svg>
+      3D Map
+    </a>
+    <a href="chords.html" class="nav-item" data-page="chords">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></svg>
+      Chord Library
+    </a>
+    <a href="tuner.html" class="nav-item" data-page="tuner">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z"/><path d="M19 10v2a7 7 0 0 1-14 0v-2"/><line x1="12" y1="19" x2="12" y2="23"/><line x1="8" y1="23" x2="16" y2="23"/></svg>
+      Tuner
+    </a>
+    <a href="practice-log.html" class="nav-item" data-page="practice">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>
+      Practice Log
+    </a>
+    <a href="song-bank.html" class="nav-item" data-page="songs">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 18V5l12-2v13"/><circle cx="6" cy="18" r="3"/><circle cx="18" cy="16" r="3"/></svg>
+      Song Bank
+    </a>
+    <a href="settings.html" class="nav-item" data-page="settings">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
+      Settings
+    </a>
+  </div>
+  <div class="sidebar-footer">
+    <button class="nav-item logout" onclick="GuitarAuth.logout()">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+        <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/>
+        <polyline points="16 17 21 12 16 7"/>
+        <line x1="21" y1="12" x2="9" y2="12"/>
+      </svg>
+      Logout
+    </button>
+  </div>
+</nav>
+
+<!-- Main Content -->
+<main class="teacher-page" id="mainContent" style="display: none;">
+  <header class="page-header">
+    <h1>
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+        <path d="M12 15a3 3 0 1 0 0-6 3 3 0 0 0 0 6z"/>
+        <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15 1.65 1.65 0 0 0 3.17 14H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68 1.65 1.65 0 0 0 10 3.17V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.32 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/>
+      </svg>
+      Admin Dashboard
+    </h1>
+  </header>
+
+  <!-- Stats -->
+  <div class="stats-overview">
+    <div class="overview-card">
+      <div class="label">Total Students</div>
+      <div class="value accent" id="statStudents">-</div>
+    </div>
+    <div class="overview-card">
+      <div class="label">Active This Week</div>
+      <div class="value green" id="statActive">-</div>
+    </div>
+    <div class="overview-card">
+      <div class="label">Total Practice</div>
+      <div class="value" id="statPractice">-</div>
+    </div>
+    <div class="overview-card">
+      <div class="label">Songs in Library</div>
+      <div class="value orange" id="statSongs">-</div>
+    </div>
+  </div>
+
+  <!-- Tabs -->
+  <div class="admin-tabs">
+    <button class="admin-tab active" data-tab="students">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+      Students
+    </button>
+    <button class="admin-tab" data-tab="activity">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 12h-4l-3 9L9 3l-3 9H2"/></svg>
+      Activity
+    </button>
+    <button class="admin-tab" data-tab="songbank">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 18V5l12-2v13"/><circle cx="6" cy="18" r="3"/><circle cx="18" cy="16" r="3"/></svg>
+      Song Bank
+    </button>
+  </div>
+
+  <!-- Students Tab -->
+  <div class="tab-panel active" id="panel-students">
+    <div class="section-header">
+      <h2>
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+        All Students
+      </h2>
+      <button class="btn-primary" id="btnAddStudent">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+        Add Student
+      </button>
+    </div>
+    <div class="data-table-wrap">
+      <table class="data-table" id="studentsTable">
+        <thead>
+          <tr>
+            <th>Student</th>
+            <th>PIN</th>
+            <th>Status</th>
+            <th>Practice</th>
+            <th>Skills</th>
+            <th>Last Login</th>
+            <th>Actions</th>
+          </tr>
+        </thead>
+        <tbody id="studentsList">
+          <tr><td colspan="7"><div class="loading-msg">Loading students...</div></td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- Activity Tab -->
+  <div class="tab-panel" id="panel-activity">
+    <div class="section-header">
+      <h2>
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 12h-4l-3 9L9 3l-3 9H2"/></svg>
+        Recent Activity
+      </h2>
+    </div>
+
+    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-bottom: 24px;">
+      <div>
+        <h3 style="font-size: 0.95rem; color: var(--text-secondary); margin-bottom: 12px;">Practice Sessions</h3>
+        <div class="activity-list" id="practiceList">
+          <div class="loading-msg">Loading activity...</div>
+        </div>
+      </div>
+      <div>
+        <h3 style="font-size: 0.95rem; color: var(--text-secondary); margin-bottom: 12px;">Recent Logins</h3>
+        <div class="activity-list" id="loginList">
+          <div class="loading-msg">Loading logins...</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="section-header">
+      <h2>
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+        Daily Practice (Last 14 Days)
+      </h2>
+    </div>
+    <div class="data-table-wrap">
+      <table class="data-table" id="dailyTable">
+        <thead>
+          <tr><th>Date</th><th>Active Students</th><th>Total Minutes</th></tr>
+        </thead>
+        <tbody id="dailyList">
+          <tr><td colspan="3"><div class="loading-msg">Loading...</div></td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- Song Bank Tab -->
+  <div class="tab-panel" id="panel-songbank">
+    <div class="section-header">
+      <h2>
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 18V5l12-2v13"/><circle cx="6" cy="18" r="3"/><circle cx="18" cy="16" r="3"/></svg>
+        Song Library
+      </h2>
+      <button class="btn-primary" id="btnAddSong">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+        Add Song
+      </button>
+    </div>
+
+    <div class="data-table-wrap">
+      <table class="data-table" id="songsTable">
+        <thead>
+          <tr>
+            <th>Title</th>
+            <th>Artist</th>
+            <th>Status</th>
+            <th>Requested By</th>
+            <th>Difficulty</th>
+            <th>Actions</th>
+          </tr>
+        </thead>
+        <tbody id="songsList">
+          <tr><td colspan="6"><div class="loading-msg">Loading songs...</div></td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+</main>
+
+<!-- Access Denied -->
+<div class="access-denied" id="accessDenied" style="display: none;">
+  <div>
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+      <rect x="3" y="11" width="18" height="11" rx="2" ry="2"/>
+      <path d="M7 11V7a5 5 0 0 1 10 0v4"/>
+    </svg>
+    <h1>Teacher Access Required</h1>
+    <p>This page is only accessible to teacher accounts.</p>
+    <a href="index.html">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="18" height="18">
+        <path d="M19 12H5M12 19l-7-7 7-7"/>
+      </svg>
+      Back to Dashboard
+    </a>
+  </div>
+</div>
+
+<!-- Add Student Modal -->
+<div class="modal-backdrop" id="addStudentModal">
+  <div class="modal">
+    <h2>
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+        <path d="M16 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="8.5" cy="7" r="4"/>
+        <line x1="20" y1="8" x2="20" y2="14"/><line x1="23" y1="11" x2="17" y2="11"/>
+      </svg>
+      Add New Student
+    </h2>
+    <p class="subtitle">Generate a PIN for a new student</p>
+    <form id="addStudentForm">
+      <div class="form-group">
+        <label>Login PIN</label>
+        <div class="generated-pin">
+          <span class="pin-val" id="generatedPin">------</span>
+          <button type="button" class="btn-gen" id="btnGeneratePin">Generate</button>
+        </div>
+        <p class="form-hint">6-digit code the student uses to log in. They will choose their own username on first login.</p>
+      </div>
+      <div class="modal-actions">
+        <button type="button" class="btn-secondary" id="btnCancelAdd">Cancel</button>
+        <button type="submit" class="btn-primary" id="btnSubmitStudent">Create Student</button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<!-- Add Song Modal -->
+<div class="modal-backdrop" id="addSongModal">
+  <div class="modal">
+    <h2>
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+        <path d="M9 18V5l12-2v13"/><circle cx="6" cy="18" r="3"/><circle cx="18" cy="16" r="3"/>
+      </svg>
+      Add Song
+    </h2>
+    <p class="subtitle">Add a song directly to the library</p>
+    <form id="addSongForm">
+      <div class="form-group">
+        <label for="songTitle">Title *</label>
+        <input type="text" id="songTitle" placeholder="e.g. Wonderwall" required>
+      </div>
+      <div class="form-group">
+        <label for="songArtist">Artist *</label>
+        <input type="text" id="songArtist" placeholder="e.g. Oasis" required>
+      </div>
+      <div class="form-group">
+        <label for="songDifficulty">Difficulty</label>
+        <select id="songDifficulty">
+          <option value="">-- Select --</option>
+          <option value="1">1 - Beginner</option>
+          <option value="2">2 - Easy</option>
+          <option value="3">3 - Intermediate</option>
+          <option value="4">4 - Advanced</option>
+          <option value="5">5 - Expert</option>
+        </select>
+      </div>
+      <div class="form-group">
+        <label for="songStyle">Style / Genre</label>
+        <input type="text" id="songStyle" placeholder="e.g. Rock, Pop, Acoustic">
+      </div>
+      <div class="form-group">
+        <label for="songLink">Tab Link (optional)</label>
+        <input type="text" id="songLink" placeholder="https://...">
+      </div>
+      <div class="modal-actions">
+        <button type="button" class="btn-secondary" id="btnCancelSong">Cancel</button>
+        <button type="submit" class="btn-primary">Add Song</button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<script>
+  const API = window.GUITAR_API_BASE || 'https://guitar-club-api.rootsofreason.workers.dev/api';
+  let studentsData = [];
+  let songsData = [];
+  let activityData = null;
+
+  // ===== Auth Check =====
+  async function checkAccess() {
+    const mainContent = document.getElementById('mainContent');
+    const accessDenied = document.getElementById('accessDenied');
+    mainContent.style.display = 'none';
+    accessDenied.style.display = 'none';
+
+    try {
+      const me = (window.GuitarAPI && typeof GuitarAPI.getMe === 'function')
+        ? await GuitarAPI.getMe()
+        : null;
+
+      if (me && me._rejected) {
+        localStorage.removeItem('guitarclub_session');
+        localStorage.removeItem('guitarclub_guest');
+      }
+
+      if (me && !me._rejected && me.isTeacher) {
+        mainContent.style.display = 'block';
+        accessDenied.style.display = 'none';
+        loadAll();
+        return;
+      }
+    } catch (e) {
+      console.warn('Teacher access check failed:', e);
+    }
+
+    mainContent.style.display = 'none';
+    accessDenied.style.display = 'flex';
+  }
+
+  // ===== API Helpers =====
+  async function apiFetch(endpoint, opts = {}) {
+    const res = await fetch(API + endpoint, {
+      credentials: 'include',
+      headers: { 'Content-Type': 'application/json' },
+      ...opts,
+      body: opts.body ? JSON.stringify(opts.body) : undefined
+    });
+    if (!res.ok) {
+      const err = await res.json().catch(() => ({}));
+      throw new Error(err.error || `HTTP ${res.status}`);
+    }
+    return res.json();
+  }
+
+  // ===== Load All Data =====
+  async function loadAll() {
+    try {
+      await Promise.all([loadStudents(), loadActivity(), loadSongs()]);
+    } catch (e) {
+      console.error('Failed to load data:', e);
+    }
+  }
+
+  // ===== Students =====
+  async function loadStudents() {
+    try {
+      const data = await apiFetch('/teacher/students');
+      studentsData = data.students || [];
+      renderStudents();
+      updateStats();
+    } catch (e) {
+      document.getElementById('studentsList').innerHTML =
+        '<tr><td colspan="7"><div class="empty-state">Could not load students. Are you logged in as teacher?</div></td></tr>';
+    }
+  }
+
+  function renderStudents() {
+    const tbody = document.getElementById('studentsList');
+    if (studentsData.length === 0) {
+      tbody.innerHTML = '<tr><td colspan="7"><div class="empty-state"><h3>No students yet</h3><p>Click "Add Student" to create the first one.</p></div></td></tr>';
+      return;
+    }
+
+    tbody.innerHTML = studentsData.map(s => {
+      const name = s.display_name || s.username;
+      const isSetup = !s.needs_setup;
+      const lastLogin = s.last_login ? timeAgo(s.last_login) : 'Never';
+      return `
+        <tr>
+          <td>
+            <div class="student-cell">
+              <div class="student-avatar-sm">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+              </div>
+              <div class="student-name-col">
+                <div class="name">${esc(name)}</div>
+                <div class="username">@${esc(s.username)}</div>
+              </div>
+            </div>
+          </td>
+          <td><span class="pin-display">${esc(s.pin)}</span></td>
+          <td><span class="setup-badge ${isSetup ? 'done' : 'pending'}">${isSetup ? 'Active' : 'Needs Setup'}</span></td>
+          <td>${s.total_practice || 0} min</td>
+          <td>${s.skills_completed || 0}</td>
+          <td>${lastLogin}</td>
+          <td>
+            <div class="action-btns">
+              <button class="btn-icon" onclick="resetPin(${s.id})" title="Reset PIN">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 2l-2 2m-7.61 7.61a5.5 5.5 0 1 1-7.78 7.78 5.5 5.5 0 0 1 7.78-7.78zm0 0L15.5 7.5m0 0l3 3L22 7l-3-3m-3.5 3.5L19 4"/></svg>
+              </button>
+              <button class="btn-icon" onclick="resetUsername(${s.id}, '${esc(name)}')" title="Reset username">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
+              </button>
+              <button class="btn-icon danger" onclick="deleteStudent(${s.id}, '${esc(name)}')" title="Delete">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg>
+              </button>
+            </div>
+          </td>
+        </tr>`;
+    }).join('');
+  }
+
+  // ===== Activity =====
+  async function loadActivity() {
+    try {
+      activityData = await apiFetch('/teacher/activity');
+      renderActivity();
+    } catch (e) {
+      document.getElementById('practiceList').innerHTML = '<div class="empty-state">Could not load activity.</div>';
+      document.getElementById('loginList').innerHTML = '<div class="empty-state">Could not load logins.</div>';
+    }
+  }
+
+  function renderActivity() {
+    if (!activityData) return;
+
+    // Practice logs
+    const practiceEl = document.getElementById('practiceList');
+    const logs = activityData.recentLogs || [];
+    if (logs.length === 0) {
+      practiceEl.innerHTML = '<div class="empty-state">No practice sessions yet.</div>';
+    } else {
+      practiceEl.innerHTML = logs.slice(0, 15).map(l => `
+        <div class="activity-item">
+          <div class="icon practice">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>
+          </div>
+          <div class="info">
+            <div class="title">${esc(l.display_name || l.username)} practiced ${l.duration_minutes || 0} min</div>
+            <div class="meta">${l.focus_area || 'General practice'}</div>
+          </div>
+          <div class="time">${timeAgo(l.created_at)}</div>
+        </div>
+      `).join('');
+    }
+
+    // Login history
+    const loginEl = document.getElementById('loginList');
+    const logins = activityData.loginHistory || [];
+    if (logins.length === 0) {
+      loginEl.innerHTML = '<div class="empty-state">No logins recorded.</div>';
+    } else {
+      loginEl.innerHTML = logins.map(l => `
+        <div class="activity-item">
+          <div class="icon login">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M15 3h4a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2h-4"/><polyline points="10 17 15 12 10 7"/><line x1="15" y1="12" x2="3" y2="12"/></svg>
+          </div>
+          <div class="info">
+            <div class="title">${esc(l.display_name || l.username)}</div>
+            <div class="meta">@${esc(l.username)}</div>
+          </div>
+          <div class="time">${timeAgo(l.last_login)}</div>
+        </div>
+      `).join('');
+    }
+
+    // Daily totals
+    const dailyEl = document.getElementById('dailyList');
+    const daily = activityData.dailyTotals || [];
+    if (daily.length === 0) {
+      dailyEl.innerHTML = '<tr><td colspan="3"><div class="empty-state">No data yet.</div></td></tr>';
+    } else {
+      dailyEl.innerHTML = daily.map(d => `
+        <tr>
+          <td>${d.date}</td>
+          <td>${d.active_students}</td>
+          <td>${d.total_minutes} min</td>
+        </tr>
+      `).join('');
+    }
+  }
+
+  // ===== Songs =====
+  async function loadSongs() {
+    try {
+      const data = await apiFetch('/teacher/songs');
+      songsData = data.songs || [];
+      renderSongs();
+      document.getElementById('statSongs').textContent = songsData.filter(s => s.status === 'ready').length;
+    } catch (e) {
+      document.getElementById('songsList').innerHTML =
+        '<tr><td colspan="6"><div class="empty-state">Could not load songs.</div></td></tr>';
+    }
+  }
+
+  function renderSongs() {
+    const tbody = document.getElementById('songsList');
+    if (songsData.length === 0) {
+      tbody.innerHTML = '<tr><td colspan="6"><div class="empty-state"><h3>No songs yet</h3><p>Add songs or wait for student requests.</p></div></td></tr>';
+      return;
+    }
+
+    tbody.innerHTML = songsData.map(s => `
+      <tr>
+        <td><strong>${esc(s.title)}</strong></td>
+        <td>${esc(s.artist)}</td>
+        <td><span class="status-badge ${s.status}">${s.status}</span></td>
+        <td>${s.requester_name ? esc(s.requester_name) : '<span style="color:var(--text-muted)">Teacher</span>'}</td>
+        <td>${s.difficulty ? 'Lvl ' + s.difficulty : '-'}</td>
+        <td>
+          <div class="action-btns">
+            ${s.status === 'pending' ? `
+              <button class="btn-icon" onclick="approveSong(${s.id})" title="Approve" style="color: #3fb950; border-color: #3fb950;">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="20 6 9 17 4 12"/></svg>
+              </button>
+              <button class="btn-icon danger" onclick="rejectSong(${s.id})" title="Reject">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+              </button>
+            ` : ''}
+            <button class="btn-icon danger" onclick="deleteSong(${s.id}, '${esc(s.title)}')" title="Delete">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg>
+            </button>
+          </div>
+        </td>
+      </tr>
+    `).join('');
+  }
+
+  // ===== Student Actions =====
+  async function resetPin(id) {
+    const pin = generatePin();
+    if (!confirm('Generate a new PIN for this student?\n\nNew PIN: ' + pin)) return;
+    try {
+      await apiFetch(`/teacher/students/${id}/reset-pin`, { method: 'PUT', body: { pin } });
+      alert('PIN reset to: ' + pin + '\n\nGive this to the student.');
+      loadStudents();
+    } catch (e) { alert('Failed: ' + e.message); }
+  }
+
+  async function resetUsername(id, name) {
+    if (!confirm(`Reset username for ${name}? They will need to choose a new username on next login.`)) return;
+    try {
+      await apiFetch(`/teacher/students/${id}/reset-username`, { method: 'PUT' });
+      alert('Username reset. Student will set a new one on next login.');
+      loadStudents();
+    } catch (e) { alert('Failed: ' + e.message); }
+  }
+
+  async function deleteStudent(id, name) {
+    if (!confirm(`Delete ${name}? This removes all their data and cannot be undone.`)) return;
+    try {
+      await apiFetch(`/teacher/students/${id}`, { method: 'DELETE' });
+      loadStudents();
+    } catch (e) { alert('Failed: ' + e.message); }
+  }
+
+  // ===== Song Actions =====
+  async function approveSong(id) {
+    try {
+      await apiFetch(`/teacher/songs/${id}`, { method: 'PUT', body: { status: 'ready' } });
+      loadSongs();
+    } catch (e) { alert('Failed: ' + e.message); }
+  }
+
+  async function rejectSong(id) {
+    try {
+      await apiFetch(`/teacher/songs/${id}`, { method: 'PUT', body: { status: 'rejected' } });
+      loadSongs();
+    } catch (e) { alert('Failed: ' + e.message); }
+  }
+
+  async function deleteSong(id, title) {
+    if (!confirm(`Delete "${title}" from the library?`)) return;
+    try {
+      await apiFetch(`/teacher/songs/${id}`, { method: 'DELETE' });
+      loadSongs();
+    } catch (e) { alert('Failed: ' + e.message); }
+  }
+
+  // ===== Utilities =====
+  function generatePin() {
+    return Math.floor(100000 + Math.random() * 900000).toString();
+  }
+
+  function esc(str) {
+    if (!str) return '';
+    const el = document.createElement('span');
+    el.textContent = str;
+    return el.innerHTML;
+  }
+
+  function timeAgo(dateStr) {
+    if (!dateStr) return 'Never';
+    const d = new Date(dateStr);
+    const now = new Date();
+    const diff = now - d;
+    const mins = Math.floor(diff / 60000);
+    const hrs = Math.floor(diff / 3600000);
+    const days = Math.floor(diff / 86400000);
+    if (mins < 1) return 'Just now';
+    if (mins < 60) return mins + 'm ago';
+    if (hrs < 24) return hrs + 'h ago';
+    if (days < 7) return days + 'd ago';
+    return d.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
+  }
+
+  function updateStats() {
+    document.getElementById('statStudents').textContent = studentsData.length;
+    const weekAgo = Date.now() - 7 * 86400000;
+    const active = studentsData.filter(s => s.last_login && new Date(s.last_login) > weekAgo).length;
+    document.getElementById('statActive').textContent = active;
+    const totalMin = studentsData.reduce((sum, s) => sum + (s.total_practice || 0), 0);
+    document.getElementById('statPractice').textContent = (totalMin / 60).toFixed(1) + ' hrs';
+  }
+
+  // ===== Tab Switching =====
+  document.querySelectorAll('.admin-tab').forEach(tab => {
+    tab.addEventListener('click', () => {
+      document.querySelectorAll('.admin-tab').forEach(t => t.classList.remove('active'));
+      document.querySelectorAll('.tab-panel').forEach(p => p.classList.remove('active'));
+      tab.classList.add('active');
+      document.getElementById('panel-' + tab.dataset.tab).classList.add('active');
+    });
+  });
+
+  // ===== Add Student Modal =====
+  document.getElementById('btnAddStudent').addEventListener('click', () => {
+    document.getElementById('generatedPin').textContent = generatePin();
+    document.getElementById('addStudentModal').classList.add('open');
+  });
+
+  document.getElementById('btnCancelAdd').addEventListener('click', () => {
+    document.getElementById('addStudentModal').classList.remove('open');
+  });
+
+  document.getElementById('btnGeneratePin').addEventListener('click', () => {
+    document.getElementById('generatedPin').textContent = generatePin();
+  });
+
+  document.getElementById('addStudentForm').addEventListener('submit', async (e) => {
+    e.preventDefault();
+    const pin = document.getElementById('generatedPin').textContent;
+    if (pin === '------') { alert('Generate a PIN first'); return; }
+
+    const placeholder = '_pin_' + pin;
+    try {
+      await apiFetch('/teacher/students', {
+        method: 'POST',
+        body: { username: placeholder, pin, displayName: null }
+      });
+      alert('Student created!\n\nPIN: ' + pin + '\n\nGive this to the student. They will choose their own username on first login.');
+      document.getElementById('addStudentModal').classList.remove('open');
+      loadStudents();
+    } catch (e) { alert('Failed: ' + e.message); }
+  });
+
+  // ===== Add Song Modal =====
+  document.getElementById('btnAddSong').addEventListener('click', () => {
+    document.getElementById('addSongModal').classList.add('open');
+  });
+
+  document.getElementById('btnCancelSong').addEventListener('click', () => {
+    document.getElementById('addSongModal').classList.remove('open');
+    document.getElementById('addSongForm').reset();
+  });
+
+  document.getElementById('addSongForm').addEventListener('submit', async (e) => {
+    e.preventDefault();
+    const title = document.getElementById('songTitle').value.trim();
+    const artist = document.getElementById('songArtist').value.trim();
+    const difficulty = document.getElementById('songDifficulty').value || null;
+    const style = document.getElementById('songStyle').value.trim() || null;
+    const tab_link = document.getElementById('songLink').value.trim() || null;
+
+    try {
+      await apiFetch('/teacher/songs', {
+        method: 'POST',
+        body: { title, artist, difficulty, style, tab_link }
+      });
+      document.getElementById('addSongModal').classList.remove('open');
+      document.getElementById('addSongForm').reset();
+      loadSongs();
+    } catch (e) { alert('Failed: ' + e.message); }
+  });
+
+  // ===== Close modals on backdrop =====
+  document.querySelectorAll('.modal-backdrop').forEach(m => {
+    m.addEventListener('click', (e) => {
+      if (e.target === m) m.classList.remove('open');
+    });
+  });
+
+  // ===== Sidebar toggle =====
+  document.getElementById('sidebarToggle').addEventListener('click', function() {
+    document.getElementById('appSidebar').classList.toggle('open');
+  });
+
+  // ===== Init =====
+  checkAccess();
+</script>
+</body>
+</html>

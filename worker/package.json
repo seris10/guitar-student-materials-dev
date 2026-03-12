@@ -1,0 +1,22 @@
+{
+  "name": "guitar-club-api",
+  "version": "1.0.0",
+  "private": true,
+  "scripts": {
+    "dev": "wrangler dev",
+    "deploy": "wrangler deploy",
+    "typecheck": "tsc --noEmit -p tsconfig.json",
+    "test": "vitest run",
+    "db:create": "wrangler d1 create guitar-club-db",
+    "db:init": "wrangler d1 execute guitar-club-db --file=schema.sql",
+    "db:init:local": "wrangler d1 execute guitar-club-db --local --file=schema.sql",
+    "db:migrate:songs": "wrangler d1 execute guitar-club-db --file=migrations/2026-03-11-songs-consistency.sql",
+    "db:migrate:songs:local": "wrangler d1 execute guitar-club-db --local --file=migrations/2026-03-11-songs-consistency.sql"
+  },
+  "devDependencies": {
+    "@cloudflare/workers-types": "^4.20240117.0",
+    "typescript": "^5.3.3",
+    "vitest": "^4.0.18",
+    "wrangler": "^3.24.0"
+  }
+}
