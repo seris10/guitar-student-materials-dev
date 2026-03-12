@@ -50,7 +50,6 @@ jobs:
   deploy_pages:
     name: Deploy Pages
     needs: verify
-    if: ${{ secrets.CLOUDFLARE_API_TOKEN != '' && secrets.CLOUDFLARE_ACCOUNT_ID != '' }}
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
@@ -66,7 +65,6 @@ jobs:
   deploy_worker:
     name: Deploy Worker API
     needs: verify
-    if: ${{ secrets.CLOUDFLARE_API_TOKEN != '' && secrets.CLOUDFLARE_ACCOUNT_ID != '' }}
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
